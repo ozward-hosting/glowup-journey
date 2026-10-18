@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glowup-journey-v5';
+const CACHE_NAME = 'glowup-journey-v6';
 const ASSETS = [
   './','./index.html','./manifest.webmanifest','./icon.svg','./apple-touch-icon.png',
   './hero-art.png','./hero-character.jpg',
