@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glowup-journey-v12-supabase-cloud-sync';
+const CACHE_NAME = 'glowup-journey-v13-account-isolation';
 const ASSETS = [
   './','./index.html','./manifest.webmanifest','./icon.svg','./apple-touch-icon.png',
   './hero-art.png','./hero-character.jpg',
