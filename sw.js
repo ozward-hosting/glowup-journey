@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glowup-journey-v9-brand-menu';
+const CACHE_NAME = 'glowup-journey-v10-evening-treadmill';
 const ASSETS = [
   './','./index.html','./manifest.webmanifest','./icon.svg','./apple-touch-icon.png',
   './hero-art.png','./hero-character.jpg',
