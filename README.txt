@@ -1,32 +1,20 @@
-GlowUp Journey v2 — PWA statis untuk iPhone
+GLOWUP JOURNEY — V3 VISUAL FIX + DEMO MODE
 
-File:
-- index.html: aplikasi utama
-- hero-art.png: ilustrasi karakter cowok
-- manifest.webmanifest: metadata instalasi web app
-- sw.js: cache dasar untuk mode offline setelah file pernah dibuka
-- icon.svg dan apple-touch-icon.png: ikon browser/Home Screen
+What changed
+- Replaced the abstract stick-figure workout drawings with five clear full-body exercise illustrations. They are intentionally still images (not anatomically confusing animated stick figures).
+- Enlarged the exercise image area and stopped cropping limbs inside the cards.
+- Fixed the dashboard hero illustration to show the character from head to shoes.
+- Added a “Lihat akun demo · data contoh 5 bulan” button on the login screen. Demo data includes a sample weight/waist trend, food journal, water log, and workout streak. A visible DEMO banner identifies it as sample data.
+- Demo data saves to a separate localStorage key, so changes in demo mode do not overwrite the private Ovik profile data. “Reset demo” restores the sample data.
 
-Fitur:
-- Profil lokal di perangkat (bukan akun online)
-- Dashboard, kutipan harian, checklist, streak
-- Grafik berat dan lingkar pinggang
-- Workout pemula dengan ilustrasi SVG animatif
-- Database 1.000+ kombinasi menu/porsi dari daftar menu dan kalori perkiraan
-- Jurnal multi-item untuk sarapan, makan siang, malam, camilan, minuman
-- Air minum, target kalori, pengaturan jadwal
-- Impor/ekspor backup JSON
+Deploy from iPhone
+1. Download and extract this ZIP in the Files app.
+2. Open the GitHub repository: https://github.com/ozward-hosting/glowup-journey
+3. Choose Add file > Upload files. Upload all files from this folder and replace matching filenames. Include all new image files: hero-character.jpg and the five exercise-*.jpg files.
+4. Commit changes to the main branch.
+5. Wait for GitHub Pages to publish, then reload https://ozward-hosting.github.io/glowup-journey/ . If Safari shows old assets, close that tab and reopen the site.
 
-Batasan penting:
-- Kalori merupakan estimasi dan bisa berbeda berdasarkan resep/merek/porsi nyata.
-- Data lokal dapat hilang jika browser/website data dibersihkan; ekspor backup berkala.
-- Profil tidak memiliki autentikasi cloud atau sinkronisasi lintas perangkat.
-- GitHub Pages statis tidak mengirim alarm terjadwal saat aplikasi ditutup. Web Push perlu backend/layanan push dan izin pengguna tambahan.
-
-Publikasi: upload semua isi folder ini ke root repository GitHub Pages (replace file lama saat diminta), lalu pastikan Settings > Pages menggunakan branch main dan folder /(root). Setelah commit, tunggu deploy selesai lalu reload situs.
-
-
-LOCAL LOGIN (personal convenience only)
-Username: Ovik
-Password: as provided by the owner. Do not reuse this password on other services.
-This is a client-side lock, not real account security. Anyone with access to public source code may bypass it. Do not store sensitive data in this public repository.
+Important limitations
+- This remains a static web app. “Ovik” login is a local browser gate, not real secure authentication, and this does not synchronize to other devices. Do not rely on it to protect sensitive information.
+- Demo data are invented illustrations for testing the dashboard, not real health records or a recommended weight-loss trajectory. Calories are estimates.
+- Reminder times are preferences only; the site does not send scheduled push notifications by itself.
