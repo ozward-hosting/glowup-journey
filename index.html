@@ -305,7 +305,19 @@ window.addEventListener('resize',()=>{clearTimeout(window._chartResize);window._
 
   function status(message, isError=false){
     const el = document.getElementById('glowupCloudStatus');
-    if(el){ el.textContent = message || ''; el.style.color = isError ? '#a64232' : '#456b55'; }
+    if(el){
+      el.textContent = message || '';
+      el.style.color = isError ? '#8f2e25' : '#215542';
+      el.style.background = isError ? '#fff0ed' : '#eef7ee';
+      el.style.borderColor = isError ? '#edc4bd' : '#cde2d0';
+      el.style.padding = message ? '12px 13px' : '0';
+      el.style.minHeight = message ? '18px' : '0';
+      el.style.marginBottom = message ? '12px' : '0';
+      el.setAttribute('data-error', isError ? 'true' : 'false');
+      if(message && (isError || /berhasil|verifikasi|buat akun|masuk/i.test(message))){
+        try{ el.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(e){}
+      }
+    }
   }
   function makeClient(key){
     if(!window.supabase || typeof window.supabase.createClient !== 'function'){
@@ -407,7 +419,11 @@ window.addEventListener('resize',()=>{clearTimeout(window._chartResize);window._
     }
     saveErrorShown = false;
     saveUserLocalSnapshot(cloudUser.id);
-    status('Tersimpan online · akun ' + (cloudUser.email || 'GlowUp'));
+    const label=document.getElementById('profileSubLabel');
+    const pill=document.getElementById('progressStorageStatus');
+    if(label)label.textContent='Cloud tersimpan';
+    if(pill)pill.textContent='Cloud tersimpan';
+    status('Data tersimpan online di akun ' + (cloudUser.email || 'GlowUp'));
   }
   function redrawApp(){
     const gate = document.getElementById('loginGate');
@@ -433,7 +449,7 @@ window.addEventListener('resize',()=>{clearTimeout(window._chartResize);window._
     cloudReady = false;
     window.glowupSuggestedUsername = cleanNameFromUser(user);
     const {data:row,error}=await client.from('glowup_user_data').select('data').eq('user_id',user.id).maybeSingle();
-    if(error) throw new Error('Login berhasil, tetapi data cloud belum bisa dibaca. Periksa koneksi database dan izin tabel.');
+    if(error) throw new Error('Akun terautentikasi, tetapi data cloud tidak bisa dibaca: '+error.message+'. Periksa tabel glowup_user_data dan policy RLS.');
     if(row && row.data && typeof row.data==='object'){
       const rawSchemaVersion=Number(row.data.__glowup_account_schema_version||0);
       const oldState=normalizedState(row.data);
@@ -484,9 +500,9 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
     cloudReady=true;
     redrawApp();
     const label=document.getElementById('profileSubLabel');
-    if(label)label.textContent='Cloud tersinkron';
+    if(label)label.textContent='Cloud tersimpan';
     const storagePill=document.getElementById('progressStorageStatus');
-    if(storagePill)storagePill.textContent='Cloud tersinkron';
+    if(storagePill)storagePill.textContent='Cloud tersimpan';
     consumeVerificationNotice(user);
   }
 
@@ -505,6 +521,8 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
         <div class="login-mark">🌿</div><div class="tagline">STRONGER HABITS · A HEALTHIER YOU</div>
         <h1>GlowUp Journey</h1>
         <p>Catat kebiasaan dan progresmu dengan akun pribadi. Data tiap akun tersimpan terpisah.</p>
+        <div class="cloud-status" id="glowupCloudStatus" role="alert" aria-live="assertive"></div>
+        <button type="button" class="secondary cloud-btn-alt" id="glowupResendBtn" style="display:none" onclick="glowupResendVerification()">Kirim ulang email konfirmasi</button>
         ${connectionBlock}
         <div class="cloud-divider"></div>
         <div id="glowupUsernameWrap" class="signup-only"><label for="glowupUsername">Username / nama tampilan</label><input id="glowupUsername" type="text" maxlength="40" minlength="2" autocomplete="nickname" autocapitalize="words" placeholder="Nama yang akan tampil di aplikasi"><p class="auth-mode-note">Ini nama tampilanmu. Kamu tetap masuk menggunakan email dan password.</p></div>
@@ -514,7 +532,6 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
         <input id="glowupPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="Minimal 6 karakter">
         <button type="submit" id="glowupAuthSubmit">Masuk ke akun</button>
         <button type="button" class="secondary cloud-btn-alt" id="glowupAuthSwitch" onclick="setGlowupAuthMode('signup')">Belum punya akun? Buat akun baru</button>
-        <div class="cloud-status" id="glowupCloudStatus" role="status" aria-live="polite"></div>
         <div class="cloud-divider"></div><button type="button" class="secondary demo-launch" onclick="enterDemo()">Lihat akun demo · data contoh</button>
       </form>`;
     gate.style.display=appMode==='demo'?'none':'flex';
@@ -526,12 +543,30 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
     authMode=mode==='signup'?'signup':'signin';
     const wrap=document.getElementById('glowupUsernameWrap'),name=document.getElementById('glowupUsername');
     const submit=document.getElementById('glowupAuthSubmit'),switcher=document.getElementById('glowupAuthSwitch'),password=document.getElementById('glowupPassword');
-    if(wrap)wrap.style.display=authMode==='signup'?'block':'none';
+    if(wrap){wrap.style.display=authMode==='signup'?'block':'none';wrap.setAttribute('aria-hidden',authMode==='signup'?'false':'true');}
     if(name)name.required=authMode==='signup';
     if(submit)submit.textContent=authMode==='signup'?'Buat akun online':'Masuk ke akun';
     if(switcher){switcher.textContent=authMode==='signup'?'Sudah punya akun? Masuk':'Belum punya akun? Buat akun baru';switcher.setAttribute('onclick',`setGlowupAuthMode('${authMode==='signup'?'signin':'signup'}')`);}
-    if(password)password.autocomplete=authMode==='signup'?'new-password':'current-password';
-    status('');
+    if(password){password.autocomplete=authMode==='signup'?'new-password':'current-password';password.setCustomValidity('');}
+    const resend=document.getElementById('glowupResendBtn');if(resend&&authMode==='signup')resend.style.display='none';
+    const email=document.getElementById('glowupEmail');
+    if(email)email.setCustomValidity('');
+    status(authMode==='signup'?'Mode daftar aktif. Isi nama tampilan, email, dan password, lalu tekan “Buat akun online”.':'Mode masuk aktif. Masukkan email dan password akunmu.');
+  };
+
+  window.glowupResendVerification = async function(){
+    const email=(document.getElementById('glowupEmail')?.value||'').trim().toLowerCase();
+    if(!email){status('Isi alamat email terlebih dahulu, lalu tekan kirim ulang.',true);return;}
+    try{
+      const c=currentClient();
+      if(!c)throw new Error('Koneksi database belum siap.');
+      const {error}=await c.auth.resend({type:'signup',email,options:{emailRedirectTo:EMAIL_REDIRECT}});
+      if(error)throw error;
+      status(`Email konfirmasi baru dikirim ke ${email}. Buka inbox atau folder spam, lalu gunakan tautan yang paling baru.`,false);
+    }catch(err){
+      const m=String(err?.message||'');
+      status(/rate limit|too many requests/i.test(m)?'Email baru saja dikirim. Tunggu beberapa menit sebelum meminta tautan berikutnya.':'Belum bisa mengirim ulang email: '+(m||'periksa koneksi internet.'),true);
+    }
   };
 
   window.glowupSaveConnection = function(){
@@ -568,7 +603,10 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
           showMainNotice(`Selamat datang, ${username}! Akun kamu siap digunakan.`);
         }else{
           localStorage.setItem(PENDING_VERIFY_PREFIX+email,'1');
-          status(`Akun ${username} berhasil dibuat. Email verifikasi sudah diminta untuk ${email}. Buka inbox atau folder spam, lalu tekan tautan “Confirm your email”. Setelah verifikasi, kamu akan kembali ke GlowUp Journey. Jika belum masuk otomatis, pilih “Masuk ke akun” dengan email dan password yang sama.`);
+          status(`Akun ${username} berhasil dibuat. Cek inbox atau folder spam ${email}, lalu tekan tombol konfirmasi email. Setelah itu kembali ke aplikasi dan pilih “Masuk ke akun” dengan email dan password yang sama.`,false);
+          window.setGlowupAuthMode('signin');
+          status(`Akun ${username} sudah dibuat. Email konfirmasi dikirim ke ${email}. Buka email tersebut, tekan tombol konfirmasi, lalu kembali ke aplikasi untuk masuk.`,false);
+          const resend=document.getElementById('glowupResendBtn');if(resend)resend.style.display='block';
         }
       }else{
         const {data,error}=await client.auth.signInWithPassword({email,password});
@@ -579,9 +617,14 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
       }
     }catch(err){
       const message=String(err?.message||'');
-      if(/email not confirmed/i.test(message))status('Email belum terverifikasi. Buka email konfirmasi dari Supabase, klik tautannya, lalu coba masuk lagi.',true);
-      else if(/user already registered|already registered/i.test(message))status('Email ini sudah terdaftar. Pilih “Masuk ke akun” atau gunakan fitur lupa password di Supabase.',true);
-      else status(message||'Belum bisa memproses akun. Periksa email, password, koneksi internet, lalu coba lagi.',true);
+      if(/invalid login credentials|invalid credentials/i.test(message))status('Email atau password salah. Periksa kembali ejaan email dan password, lalu coba lagi.',true);
+      else if(/email not confirmed/i.test(message)){status('Email belum terverifikasi. Buka email konfirmasi terbaru, atau kirim ulang tautannya lewat tombol di bawah pesan ini.',true);const resend=document.getElementById('glowupResendBtn');if(resend)resend.style.display='block';}
+      else if(/user already registered|already registered/i.test(message))status('Email ini sudah terdaftar. Pilih “Masuk ke akun”, bukan “Buat akun online”.',true);
+      else if(/password should be at least|weak password/i.test(message))status('Password terlalu pendek atau terlalu mudah ditebak. Buat password yang lebih kuat (minimal 6 karakter).',true);
+      else if(/rate limit|too many requests/i.test(message))status('Terlalu banyak percobaan dalam waktu singkat. Tunggu beberapa menit, lalu coba lagi.',true);
+      else if(/failed to fetch|network|load failed/i.test(message))status('Tidak bisa terhubung ke layanan akun. Periksa internet iPhone, lalu muat ulang halaman.',true);
+      else status('Belum berhasil: '+(message||'periksa email, password, dan koneksi internet.'),true);
+      if(message) console.warn('[GlowUp auth]',message);
     }finally{
       const button=document.getElementById('glowupAuthSubmit');
       if(button){button.disabled=false;button.textContent=authMode==='signup'?'Buat akun online':'Masuk ke akun';}
@@ -595,8 +638,18 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
     state.__glowup_owner_id=cloudUser.id;
     saveUserLocalSnapshot(cloudUser.id);
     if(!cloudReady||!client)return;
+    const label=document.getElementById('profileSubLabel');
+    const pill=document.getElementById('progressStorageStatus');
+    if(label)label.textContent='Menyimpan ke cloud…';
+    if(pill)pill.textContent='Menyimpan…';
     clearTimeout(saveTimer);
-    saveTimer=setTimeout(()=>{writeCloud(false).catch(()=>{});},900);
+    saveTimer=setTimeout(()=>{writeCloud(false).catch(err=>{
+      const label=document.getElementById('profileSubLabel');
+      const pill=document.getElementById('progressStorageStatus');
+      if(label)label.textContent='Belum tersinkron';
+      if(pill)pill.textContent='Belum tersinkron';
+      status('Data belum tersimpan online. '+(err?.message||'Periksa koneksi database.'),true);
+    });},900);
   };
   window.renderProfile=function(){
     oldRenderProfile();
@@ -644,5 +697,5 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
 })();
 </script>
 
-<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=13-account-isolation',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
+<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=14-auth-feedback',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
 </body></html>
