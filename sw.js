@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glowup-journey-v14-auth-feedback';
+const CACHE_NAME = 'glowup-journey-v15-auth-workout-audit';
 const ASSETS = [
   './','./index.html','./manifest.webmanifest','./icon.svg','./apple-touch-icon.png',
   './hero-art.png','./hero-character.jpg',

@@ -221,6 +221,7 @@ function renderBMI(){const w=latestWeight(),heightCm=Number(state.profile?.heigh
 
 function renderHome(){const w=latestWeight(),hasWeight=state.weights.length>0&&Number.isFinite(Number(w.weight)),s=state.settings,target=Number(s.target)||63;document.getElementById('todayLabel').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();document.getElementById('quote').textContent='“'+quoteToday()+'”';document.getElementById('heroGreeting').textContent=`Hai${state.profile?.name?' '+state.profile.name:''}! Hari ini kesempatan baru untuk merawat diri.`;document.getElementById('homeWeight').textContent=hasWeight?Number(w.weight).toFixed(1):'—';document.getElementById('homeTarget').textContent=target;document.getElementById('remainingWeight').textContent=hasWeight?(w.weight>target?`${(w.weight-target).toFixed(1)} kg menuju target`:'Target tercapai!'):'Isi profilmu untuk mulai';const hist=[...state.weights].sort((a,b)=>a.date.localeCompare(b.date));document.getElementById('weightTrend').textContent=hist.length>1?`${hist[0].weight} kg awal · ${hist.at(-1).weight} kg terakhir`:'Mulai catat trenmu';document.getElementById('homeCalories').textContent=dailyCalories().toLocaleString('id-ID');document.getElementById('calorieSub').textContent=`Target ${Number(s.calorieTarget||2000).toLocaleString('id-ID')} kkal`;document.getElementById('homeStreak').textContent=streak();document.getElementById('homeWaist').textContent=hasWeight&&w.waist?`${w.waist} cm`:'— cm';document.getElementById('homeWorkouts').textContent=`${workoutsThisWeek()} kali`;document.getElementById('homeWater').textContent=`${(Number(state.water[dateKey()]||0)/250).toFixed(0)} / ${Math.round(Number(s.waterTarget||2)*4)} gelas`;renderBMI();renderSchedule();renderReview();drawChart(document.getElementById('homeChart'),state.weights,'weight','#3e8065',true)}
 
+function setWorkoutSession(session,btn){if(session!=='morning'&&session!=='evening')return;workoutSession=session;document.querySelectorAll('[data-workout-session]').forEach(b=>b.classList.toggle('active',b.dataset.workoutSession===session));renderWorkout();}
 function renderWorkout(){const c=dailyChecks(),weekend=isWeekend(),treadmill=weekend?45:20,walk=weekend?37:12,total=15+treadmill;const morningTime=state.settings[weekend?'weekendMorningTime':'weekdayMorningTime']||'05:30',eveningTime=state.settings[weekend?'weekendEveningTime':'weekdayEveningTime']||'19:00';document.getElementById('morningSessionTime').textContent=morningTime.replace(':','.');document.getElementById('eveningSessionTime').textContent=eveningTime.replace(':','.');document.getElementById('morningWorkoutPanel').style.display=workoutSession==='morning'?'block':'none';document.getElementById('eveningWorkoutPanel').style.display=workoutSession==='evening'?'block':'none';document.querySelectorAll('[data-workout-session]').forEach(b=>b.classList.toggle('active',b.dataset.workoutSession===workoutSession));const isMorning=workoutSession==='morning';document.getElementById('workoutTotalBadge').textContent=isMorning?`Pagi · ${total} menit`:`Sore/malam · ${total} menit`;document.getElementById('workoutHeroEyebrow').textContent=isMorning?'SESI PAGI':'SESI SORE / MALAM';document.getElementById('workoutHeroTitle').textContent=isMorning?'Bangunin badan dulu, yuk.':'Reset badan pelan-pelan.';document.getElementById('workoutHeroDescription').textContent=`15 menit latihan ringan + ${treadmill} menit treadmill${weekend?' (weekend, santai lebih lama)':' (hari kerja)'}.`;document.getElementById('treadmillTitleDuration').textContent=treadmill;document.getElementById('treadmillWalkDuration').textContent=`${walk} min`;document.getElementById('treadmillIntensityNote').textContent=`5 menit pemanasan + ${walk} menit jalan + 3 menit pendinginan. Pilih tempo yang masih memungkinkanmu ngobrol.`;document.getElementById('eveningTreadmillTitleDuration').textContent=treadmill;document.getElementById('eveningTreadmillWalkDuration').textContent=`${walk} min`;document.getElementById('eveningTreadmillIntensityNote').textContent=`5 menit pemanasan + ${walk} menit jalan + 3 menit pendinginan. Pilih tempo yang masih memungkinkanmu ngobrol.`;document.getElementById('eveningSessionSummary').textContent=`Sesi lengkap: latihan ringan 15 menit + treadmill ${treadmill} menit · total ${total} menit${weekend?' (weekend)':' (hari kerja)'}.`;document.getElementById('exerciseList').innerHTML=EXERCISES.map((e,i)=>`<div class="exercise-card"><div class="exercise-art"><img src="${EXERCISE_ARTS[i]}" alt="Ilustrasi ${e[0]}" loading="lazy"></div><div><h3>${i+1}. ${e[0]}</h3><p>${e[1]} · ${e[2]}</p><div class="row"><span class="mini-stat" style="padding:4px 8px;font-size:10px">Ringan</span><button class="${c['ex'+i]?'':'secondary'} small-btn" onclick="toggleExercise(${i})">${c['ex'+i]?'✓ Selesai':'Tandai selesai'}</button></div></div></div>`).join('');document.getElementById('eveningExerciseList').innerHTML=EXERCISES.map((e,i)=>`<div class="exercise-card"><div class="exercise-art"><img src="${EXERCISE_ARTS[i]}" alt="Ilustrasi ${e[0]}" loading="lazy"></div><div><h3>${i+1}. ${e[0]}</h3><p>${e[1]} · ${e[2]}</p><div class="row"><span class="mini-stat" style="padding:4px 8px;font-size:10px">Ringan</span><button class="${c['eve'+i]?'':'secondary'} small-btn" onclick="toggleEveningExercise(${i})">${c['eve'+i]?'✓ Selesai':'Tandai selesai'}</button></div></div></div>`).join('');const morningDone=sessionDone('morning'),eveningDone=sessionDone('evening');const morningBtn=document.getElementById('completeMorningBtn');morningBtn.textContent=morningDone?'✓ Sesi pagi sudah dicatat':'✓ Tandai sesi pagi selesai';morningBtn.className=morningDone?'secondary':'';const eveningBtn=document.getElementById('completeEveningBtn');eveningBtn.textContent=eveningDone?'✓ Sesi sore/malam sudah dicatat':'✓ Tandai sesi sore/malam selesai';eveningBtn.className=eveningDone?'secondary':'';}
 function toggleExercise(i){if(!state.checks[dateKey()])state.checks[dateKey()]={};state.checks[dateKey()]['ex'+i]=!state.checks[dateKey()]['ex'+i];persist();renderWorkout();renderHome();renderInsights()}
 function toggleEveningExercise(i){if(!state.checks[dateKey()])state.checks[dateKey()]={};state.checks[dateKey()]['eve'+i]=!state.checks[dateKey()]['eve'+i];persist();renderWorkout();renderHome();renderInsights()}
@@ -585,53 +586,74 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
     const email=(document.getElementById('glowupEmail')?.value||'').trim().toLowerCase();
     const password=document.getElementById('glowupPassword')?.value||'';
     const username=(document.getElementById('glowupUsername')?.value||'').trim();
+    let authStage='credentials';
+    const formGate=document.getElementById('loginGate');
+    const submitButton=document.getElementById('glowupAuthSubmit');
     if(!email||!password){status('Isi email dan password terlebih dahulu.',true);return false;}
     if(mode==='signup'&&username.length<2){status('Isi username atau nama tampilan minimal 2 karakter.',true);return false;}
     try{
       client=currentClient();
-      if(!client){status('Koneksi database belum siap. Muat ulang halaman atau simpan Publishable key.',true);return false;}
-      const button=document.getElementById('glowupAuthSubmit');
-      if(button){button.disabled=true;button.textContent=mode==='signup'?'Membuat akun...':'Sedang masuk...';}
+      if(!client){status('Koneksi database belum siap. Muat ulang halaman. Jika masih muncul, periksa koneksi internet.',true);return false;}
+      if(submitButton){submitButton.disabled=true;submitButton.textContent=mode==='signup'?'Membuat akun...':'Sedang masuk...';}
       status(mode==='signup'?'Membuat akun pribadi...':'Memeriksa akun dan memuat datamu...');
       if(mode==='signup'){
+        authStage='creating-account';
         const {data,error}=await client.auth.signUp({email,password,options:{emailRedirectTo:EMAIL_REDIRECT,data:{display_name:username,username}}});
         if(error)throw error;
         if(data.session&&data.user){
+          authStage='loading-account-data';
           localStorage.removeItem(PENDING_VERIFY_PREFIX+email);
           await activateUser(data.user);
           toast(`Akun ${username} berhasil dibuat.`);
           showMainNotice(`Selamat datang, ${username}! Akun kamu siap digunakan.`);
         }else{
           localStorage.setItem(PENDING_VERIFY_PREFIX+email,'1');
-          status(`Akun ${username} berhasil dibuat. Cek inbox atau folder spam ${email}, lalu tekan tombol konfirmasi email. Setelah itu kembali ke aplikasi dan pilih “Masuk ke akun” dengan email dan password yang sama.`,false);
+          const resend=document.getElementById('glowupResendBtn');
+          if(resend)resend.style.display='block';
           window.setGlowupAuthMode('signin');
-          status(`Akun ${username} sudah dibuat. Email konfirmasi dikirim ke ${email}. Buka email tersebut, tekan tombol konfirmasi, lalu kembali ke aplikasi untuk masuk.`,false);
-          const resend=document.getElementById('glowupResendBtn');if(resend)resend.style.display='block';
+          status(`Akun ${username} berhasil dibuat. Buka email ${email}, lalu tekan tautan konfirmasi. Setelah kembali ke GlowUp Journey, masuk menggunakan email dan password yang sama. Jika email belum masuk, periksa folder spam atau gunakan tombol kirim ulang.`,false);
         }
       }else{
+        authStage='checking-credentials';
         const {data,error}=await client.auth.signInWithPassword({email,password});
         if(error)throw error;
-        if(!data.user)throw new Error('Akun belum ditemukan. Pilih “Buat akun baru” jika ini pertama kali.');
+        if(!data.user)throw new Error('Supabase tidak mengembalikan profil akun setelah login. Coba muat ulang halaman.');
+        authStage='loading-account-data';
         await activateUser(data.user);
         toast('Berhasil masuk ke akunmu.');
       }
     }catch(err){
       const message=String(err?.message||'');
-      if(/invalid login credentials|invalid credentials/i.test(message))status('Email atau password salah. Periksa kembali ejaan email dan password, lalu coba lagi.',true);
-      else if(/email not confirmed/i.test(message)){status('Email belum terverifikasi. Buka email konfirmasi terbaru, atau kirim ulang tautannya lewat tombol di bawah pesan ini.',true);const resend=document.getElementById('glowupResendBtn');if(resend)resend.style.display='block';}
-      else if(/user already registered|already registered/i.test(message))status('Email ini sudah terdaftar. Pilih “Masuk ke akun”, bukan “Buat akun online”.',true);
-      else if(/password should be at least|weak password/i.test(message))status('Password terlalu pendek atau terlalu mudah ditebak. Buat password yang lebih kuat (minimal 6 karakter).',true);
-      else if(/rate limit|too many requests/i.test(message))status('Terlalu banyak percobaan dalam waktu singkat. Tunggu beberapa menit, lalu coba lagi.',true);
-      else if(/failed to fetch|network|load failed/i.test(message))status('Tidak bisa terhubung ke layanan akun. Periksa internet iPhone, lalu muat ulang halaman.',true);
-      else status('Belum berhasil: '+(message||'periksa email, password, dan koneksi internet.'),true);
-      if(message) console.warn('[GlowUp auth]',message);
+      // If activation failed after login, explicitly reopen the gate so the message is never hidden.
+      if(formGate)formGate.style.display='flex';
+      const overlay=document.getElementById('profileOverlay');
+      if(overlay)overlay.classList.remove('show');
+      const detailed = message ? ` Detail: ${message}` : '';
+      if(authStage==='loading-account-data'){
+        status('Login berhasil dikenali, tetapi data cloud belum bisa dimuat atau disimpan. Akun tidak dihapus. Coba muat ulang; jika berulang, kirim screenshot pesan ini ke support.'+detailed,true);
+      }else if(/invalid login credentials|invalid credentials/i.test(message)){
+        status('Email atau password salah. Periksa kembali ejaan email dan password, lalu coba lagi.',true);
+      }else if(/email not confirmed/i.test(message)){
+        status('Email belum terverifikasi. Buka email konfirmasi terbaru atau tekan “Kirim ulang email konfirmasi” di bawah pesan ini.',true);
+        const resend=document.getElementById('glowupResendBtn');if(resend)resend.style.display='block';
+      }else if(/user already registered|already registered/i.test(message)){
+        status('Email ini sudah terdaftar. Pilih “Masuk ke akun”, bukan “Buat akun online”.',true);
+      }else if(/password should be at least|weak password|password is too short/i.test(message)){
+        status('Password terlalu pendek atau terlalu mudah ditebak. Gunakan password yang lebih kuat (minimal 6 karakter).',true);
+      }else if(/rate limit|too many requests/i.test(message)){
+        status('Terlalu banyak percobaan dalam waktu singkat. Tunggu beberapa menit, lalu coba lagi.',true);
+      }else if(/failed to fetch|network|load failed/i.test(message)){
+        status('Tidak bisa terhubung ke layanan akun. Periksa internet iPhone, lalu muat ulang halaman.',true);
+      }else{
+        status('Belum berhasil. Periksa email, password, dan koneksi. Jika tetap gagal, pesan teknis berikut membantu menemukan penyebabnya.'+detailed,true);
+      }
+      if(formGate)formGate.scrollTop=0;
+      if(message)console.warn('[GlowUp auth]',message);
     }finally{
-      const button=document.getElementById('glowupAuthSubmit');
-      if(button){button.disabled=false;button.textContent=authMode==='signup'?'Buat akun online':'Masuk ke akun';}
+      if(submitButton){submitButton.disabled=false;submitButton.textContent=authMode==='signup'?'Buat akun online':'Masuk ke akun';}
     }
     return false;
   };
-
   window.persist=function(){
     if(appMode==='demo'){oldPersist();return;}
     if(!cloudUser){oldPersist();return;}
@@ -671,6 +693,7 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
     oldEnterDemo();
   };
 
+  // v15 audit: restore session, keep activation failures visible, and avoid hiding auth errors.
   // Restore a previously signed-in cloud account; otherwise leave the login gate visible.
   async function boot(){
     if(appMode==='demo'){
@@ -690,12 +713,13 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
         status('Kamu kembali dari tautan konfirmasi email. Coba masuk dengan email dan password yang didaftarkan. Jika belum berhasil, buka tautan konfirmasi terbaru dari inbox email.', false);
       }
     }catch(err){
-      status(err.message || 'Koneksi belum siap. Simpan Publishable key dan coba lagi.', true);
+      if(gate)gate.style.display='flex';
+      status('Belum bisa memuat akun cloud. Data lokal tidak dihapus. '+(err.message || 'Periksa koneksi dan pengaturan database.'), true);
     }
   }
   boot();
 })();
 </script>
 
-<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=14-auth-feedback',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
+<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=15-auth-workout-audit',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
 </body></html>
