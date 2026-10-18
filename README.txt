@@ -1,16 +1,32 @@
-# GlowUp Journey — PWA package
+GlowUp Journey v2 — PWA statis untuk iPhone
 
-This is an installable web app package, not a native App Store binary.
+File:
+- index.html: aplikasi utama
+- hero-art.png: ilustrasi karakter cowok
+- manifest.webmanifest: metadata instalasi web app
+- sw.js: cache dasar untuk mode offline setelah file pernah dibuka
+- icon.svg dan apple-touch-icon.png: ikon browser/Home Screen
 
-## Data storage
-The tracker uses browser `localStorage` on the device/browser where it is used. Data stays in that browser profile and is not automatically synced to other devices. Clearing browser/site data may erase it. Use the in-app JSON export regularly.
+Fitur:
+- Profil lokal di perangkat (bukan akun online)
+- Dashboard, kutipan harian, checklist, streak
+- Grafik berat dan lingkar pinggang
+- Workout pemula dengan ilustrasi SVG animatif
+- Database 1.000+ kombinasi menu/porsi dari daftar menu dan kalori perkiraan
+- Jurnal multi-item untuk sarapan, makan siang, malam, camilan, minuman
+- Air minum, target kalori, pengaturan jadwal
+- Impor/ekspor backup JSON
 
-## To run
-- For a quick preview, open `index.html` in a browser. Some PWA/offline features require serving it over HTTPS or localhost.
-- To install as an app on iPhone, publish these files to an HTTPS website, open that URL in Safari, tap Share, then Add to Home Screen.
-- To install on desktop, serve it over HTTPS or localhost and use the browser's Install app / Add to desktop option if offered.
+Batasan penting:
+- Kalori merupakan estimasi dan bisa berbeda berdasarkan resep/merek/porsi nyata.
+- Data lokal dapat hilang jika browser/website data dibersihkan; ekspor backup berkala.
+- Profil tidak memiliki autentikasi cloud atau sinkronisasi lintas perangkat.
+- GitHub Pages statis tidak mengirim alarm terjadwal saat aplikasi ditutup. Web Push perlu backend/layanan push dan izin pengguna tambahan.
 
-## Important limitations
-- The app currently has in-app schedule settings, but it does not yet deliver guaranteed notifications when closed. iOS web push requires a properly hosted PWA, user permission, and push infrastructure; dependable local alarms may need a native iOS app.
-- Food calories are a small starter list of estimates, not a complete verified nutrition database.
-- No cloud sync or account system is included.
+Publikasi: upload semua isi folder ini ke root repository GitHub Pages (replace file lama saat diminta), lalu pastikan Settings > Pages menggunakan branch main dan folder /(root). Setelah commit, tunggu deploy selesai lalu reload situs.
+
+
+LOCAL LOGIN (personal convenience only)
+Username: Ovik
+Password: as provided by the owner. Do not reuse this password on other services.
+This is a client-side lock, not real account security. Anyone with access to public source code may bypass it. Do not store sensitive data in this public repository.

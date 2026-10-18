@@ -1,0 +1,26 @@
+GLOWUP JOURNEY — ACCOUNT PLAN
+
+Recommended: hybrid setup
+- GitHub repository: source code and artwork only (repository is public).
+- HTTPS static hosting: app delivery.
+- Supabase Auth + Postgres: real user registration/login and cloud data.
+- Local browser storage: cache/offline convenience and backup only.
+
+Planned user flows
+1. Welcome screen: Log in | Create account | Try demo.
+2. Personal account: email + password; data private to that user.
+3. Demo account: read-only, fictional 5-month weight/waist/food/workout history.
+4. Settings: export/import JSON backup, sign out, delete account/data request.
+
+Security checklist before launch
+- Enable Row Level Security (RLS).
+- Never put service_role key in HTML/JS.
+- Add email confirmation and password reset.
+- Configure Supabase Auth redirect URLs to the final HTTPS URL.
+- Test cross-account isolation with two accounts.
+- Demo must be read-only and use fictional data.
+
+Status of this package
+- v2 dashboard, local profile, charts, workout, food diary, portions, quotes and local export/import are included.
+- Online signup/login and cloud sync are NOT active until the app code is connected to a configured Supabase project.
+- Scheduled push notifications are also not configured.

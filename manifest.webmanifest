@@ -1,14 +1,20 @@
 {
   "name": "GlowUp Journey",
   "short_name": "GlowUp",
-  "description": "Personal wellness, weight, workout, and food tracker.",
+  "description": "Personal wellness tracker: food, weight, waist, workouts and habits.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f8f6ed",
-  "theme_color": "#dcebdd",
+  "background_color": "#fbf8ee",
+  "theme_color": "#dceee4",
   "orientation": "portrait",
   "icons": [
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "./icon.svg",
       "sizes": "any",
