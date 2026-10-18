@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#dcebdd">
+<title>GlowUp Journey</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="GlowUp">
+<link rel="apple-touch-icon" href="icon.svg">
+
+<style>
+:root{--mint:#dcebdd;--mint2:#b9d4c0;--green:#356b55;--deep:#234b3d;--cream:#f8f6ed;--ink:#243b33;--muted:#71867a;--white:#fffef9;--line:#e4e9df;--lav:#e9e5f3}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);padding-bottom:86px}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:14px;padding:12px 14px;background:var(--green);color:white;font-weight:650}button.secondary{background:#edf3e9;color:var(--deep);border:1px solid var(--line)}input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fffefb;color:var(--ink)}label{font-size:12px;color:var(--muted);display:block;margin:0 0 6px}.app{max-width:680px;margin:auto;padding:18px 15px}.top{display:flex;align-items:center;gap:12px;margin:6px 0 18px}.logo{width:48px;height:48px;border-radius:16px;background:var(--mint);display:grid;place-items:center;font-size:25px}.brand{font-size:22px;font-weight:850;color:var(--deep);letter-spacing:-.7px}.sub{font-size:11px;letter-spacing:2px;color:var(--muted)}.hero{background:linear-gradient(140deg,#dcebdd,#edf0df);padding:20px;border-radius:25px;overflow:hidden;position:relative}.hero .eyebrow{font-size:11px;letter-spacing:1.8px;color:var(--green);font-weight:800}.hero h1{font-size:28px;line-height:1.12;margin:9px 0;color:var(--deep);max-width:390px}.hero p{color:#536f60;line-height:1.45;font-size:14px}.avatar{font-size:68px;float:right;margin:4px 2px 0 8px;filter:drop-shadow(0 5px 4px #78958233)}.quote{background:#fffdf6;border:1px solid #e7eadf;border-radius:16px;padding:12px 14px;font-size:14px;font-style:italic;line-height:1.4}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}.card{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:15px;margin:12px 0}.metric{font-size:25px;font-weight:800;color:var(--deep)}.muted{font-size:12px;color:var(--muted);line-height:1.4}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.title{font-size:17px;font-weight:800;color:var(--deep);margin:0 0 12px}.progress{height:8px;border-radius:20px;background:#e5ebe2;overflow:hidden}.progress span{display:block;height:100%;background:#4d9274;border-radius:20px}.item{display:flex;gap:11px;align-items:center;padding:12px 0;border-bottom:1px solid #edf0e9}.item:last-child{border-bottom:0}.ico{width:40px;height:40px;flex-shrink:0;display:grid;place-items:center;border-radius:13px;background:#e8f0e4;font-size:21px}.item .body{flex:1}.item strong{font-size:14px}.item small{display:block;color:var(--muted);margin-top:4px;font-size:12px}.check{width:25px;height:25px;border-radius:50%;border:1.5px solid #aac3b1;display:grid;place-items:center;color:white;background:white}.check.done{background:#4d9274;border-color:#4d9274}.tabs{position:fixed;bottom:0;left:0;right:0;background:#fffef9ed;backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:center;padding:9px 6px max(10px,env(safe-area-inset-bottom));z-index:4}.tabs button{flex:1;max-width:130px;background:transparent;color:var(--muted);font-size:11px;padding:8px 3px}.tabs button.active{background:var(--mint);color:var(--deep)}.tabs span{display:block;font-size:20px;margin-bottom:3px}.screen{display:none}.screen.active{display:block}.field{margin:12px 0}.pill{display:inline-block;background:#eaf1e7;color:var(--green);border-radius:20px;padding:6px 10px;font-size:12px;font-weight:700}.exercise{padding:12px;background:#f5f6ef;border-radius:15px;margin:8px 0}.exercise .row{align-items:flex-start}.mini{font-size:12px;color:var(--muted)}.meal{border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0}.meal select{margin-top:8px}.note{font-size:12px;color:var(--muted);background:#f0f4ea;border-radius:12px;padding:12px;line-height:1.45}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btnrow{display:flex;gap:8px}.btnrow>*{flex:1}.toast{display:none;background:var(--deep);color:white;border-radius:12px;padding:11px;margin:10px 0;font-size:13px}.toast.show{display:block}canvas{width:100%;height:160px}h2{font-size:20px;color:var(--deep)}@media(min-width:600px){.app{padding:24px}.hero h1{font-size:34px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="logo">🌿</div><div><div class="brand">GlowUp Journey</div><div class="sub">STRONGER HABITS · HEALTHIER YOU</div></div></header>
+<div id="toast" class="toast"></div>
+<section id="home" class="screen active">
+  <div class="hero"><div class="avatar" aria-label="Karakter pria">🧑🏻‍💻</div><div class="eyebrow" id="today"></div><h1>Disiplin hari ini,<br>versi terbaik dirimu besok.</h1><p>Langkah kecil, konsisten setiap hari.</p><div class="quote" id="quote"></div></div>
+  <div class="grid">
+    <div class="card"><div class="muted">BERAT TERAKHIR</div><div class="metric"><span id="currentWeight">75</span> kg</div><div class="muted" id="weightChange">Target 63 kg</div></div>
+    <div class="card"><div class="muted">TARGET BERAT</div><div class="metric" id="targetShow">63 kg</div><div class="muted">Satu langkah setiap hari 💚</div></div>
+  </div>
+  <div class="card"><div class="row"><h3 class="title">Jadwal hari ini</h3><span class="pill" id="doneCount">0/6 selesai</span></div><div id="scheduleList"></div></div>
+  <div class="card"><div class="row"><h3 class="title">Progress perjalanan</h3><span class="muted" id="percent">0%</span></div><div class="progress"><span id="progressBar" style="width:0%"></span></div><p class="muted" id="progressText">Catat beratmu untuk mulai membangun riwayat.</p></div>
+</section>
+<section id="workout" class="screen">
+  <h2>Workout pemula 💪</h2><p class="muted">Program 35 menit: 15 menit latihan kekuatan ringan + 20 menit treadmill.</p>
+  <div class="card"><div class="row"><h3 class="title">Workout 15 menit</h3><span class="pill">Low impact</span></div><div id="exerciseList"></div><div class="note">Lemak tidak bisa dibakar hanya dari perut atau paha. Latihan ini memperkuat otot dan mendukung penurunan lemak seluruh tubuh bersama aktivitas dan pola makan yang konsisten.</div></div>
+  <div class="card"><div class="row"><h3 class="title">Treadmill · 20 menit</h3><span>🏃🏻‍♂️</span></div><div class="item"><div class="ico">🚶🏻‍♂️</div><div class="body"><strong>5 menit — pemanasan</strong><small>Jalan santai, kecepatan nyaman.</small></div></div><div class="item"><div class="ico">🏃🏻‍♂️</div><div class="body"><strong>12 menit — jalan cepat</strong><small>Atur incline rendah jika nyaman; masih bisa berbicara.</small></div></div><div class="item"><div class="ico">🌱</div><div class="body"><strong>3 menit — pendinginan</strong><small>Turunkan kecepatan secara bertahap.</small></div></div><button class="secondary" style="width:100%" onclick="markWorkout()">Tandai workout selesai</button></div>
+</section>
+<section id="food" class="screen">
+  <h2>Makanan & minuman 🍲</h2><p class="muted">Estimasi kalori berdasarkan pilihan makanan dan porsi. Nilai dapat berbeda menurut resep, merek, minyak, dan ukuran sajian.</p>
+  <div class="card"><div class="row"><h3 class="title">Catatan hari ini</h3><span class="pill" id="calorieTotal">0 kkal</span></div><div class="muted">Tidak wajib mengisi setiap waktu makan. Pilih “Lewati / puasa” jika tidak makan.</div><div id="mealList"></div><div class="field"><label>Catatan tambahan (opsional)</label><input id="foodNote" placeholder="Contoh: kopi pakai gula, camilan sore"></div><button onclick="saveFood()" style="width:100%">Simpan jurnal makan</button></div>
+  <div class="note">Database awal ini berisi contoh makanan umum dengan porsi perkiraan, bukan database laboratorium atau label resmi. Untuk produk kemasan, gunakan informasi label. Intermittent fasting opsional—tidak perlu dipaksakan, terutama jika membuatmu lemas atau pusing.</div>
+</section>
+<section id="progress" class="screen">
+  <h2>Berat & progres 📈</h2><div class="card"><div class="grid"><div><div class="muted">Berat terakhir</div><div class="metric" id="progressWeight">75 kg</div></div><div><div class="muted">Lingkar pinggang</div><div class="metric" id="waistShow">— cm</div></div></div>
+  <div class="field"><label>Catat berat badan (kg)</label><input id="weightInput" type="number" min="30" max="300" step=".1" placeholder="75.0"></div><div class="field"><label>Lingkar pinggang (cm, opsional)</label><input id="waistInput" type="number" min="30" max="250" step=".1" placeholder="Belum diukur"></div><button onclick="saveWeight()" style="width:100%">Simpan pengukuran</button></div>
+  <div class="card"><h3 class="title">Riwayat berat</h3><canvas id="chart" width="600" height="200"></canvas><div id="history"></div></div>
+</section>
+<section id="settings" class="screen">
+  <h2>Jadwal & pengaturan ⚙️</h2><div class="card"><h3 class="title">Rutinitas harian</h3><div class="settings-grid">
+  <div class="field"><label>Target bangun</label><input type="time" id="wakeTime" value="04:45"></div>
+  <div class="field"><label>Workout pagi</label><input type="time" id="morningTime" value="05:30"></div>
+  <div class="field"><label>Sarapan (opsional)</label><input type="time" id="breakfastTime" value="07:15"></div>
+  <div class="field"><label>Berangkat kerja</label><input type="time" id="leaveTime" value="06:30"></div>
+  <div class="field"><label>Mulai kerja</label><input type="time" id="workTime" value="07:30"></div>
+  <div class="field"><label>Workout malam</label><input type="time" id="eveningTime" value="19:00"></div>
+  <div class="field"><label>Mulai tidur</label><input type="time" id="sleepTime" value="22:00"></div>
+  <div class="field"><label>Target berat (kg)</label><input type="number" id="targetInput" value="63" min="35" max="200"></div>
+  </div><button style="width:100%" onclick="saveSettings()">Simpan pengaturan</button><p class="muted">Pengingat mengikuti jam pilihanmu. Untuk notifikasi otomatis di iPhone saat aplikasi ditutup, versi web perlu ditambahkan ke Home Screen dan kemampuan notifikasi perlu disiapkan/diizinkan; notifikasi latar belakang tidak dijamin oleh prototipe ini.</p></div>
+  <div class="card"><h3 class="title">Pengingat perangkat</h3><p class="muted">Versi ini menampilkan jadwal di dalam aplikasi. Kamu juga bisa membuat alarm berulang di aplikasi Clock iPhone untuk jam bangun dan workout. Notifikasi push native memerlukan pengembangan dan konfigurasi tambahan.</p><button class="secondary" style="width:100%" onclick="exportData()">Ekspor dataku (JSON)</button></div>
+</section>
+</div>
+<nav class="tabs">
+<button class="active" data-tab="home" onclick="tab('home',this)"><span>🏡</span>Beranda</button>
+<button data-tab="workout" onclick="tab('workout',this)"><span>💪</span>Workout</button>
+<button data-tab="food" onclick="tab('food',this)"><span>🍲</span>Makan</button>
+<button data-tab="progress" onclick="tab('progress',this)"><span>📈</span>Progres</button>
+<button data-tab="settings" onclick="tab('settings',this)"><span>⚙️</span>Setelan</button>
+</nav>
+<script>
+const quotes=[
+"Mulai dari yang bisa kamu lakukan hari ini. Konsistensi mengalahkan kesempurnaan.",
+"Kamu tidak harus cepat. Kamu hanya perlu terus melangkah.",
+"Rawat tubuhmu dengan sabar; perubahan baik butuh waktu.",
+"Satu workout singkat tetap lebih baik daripada tidak bergerak sama sekali.",
+"Jangan menghukum diri sendiri. Bangun kebiasaan yang bisa kamu jalani.",
+"Progress bukan garis lurus. Kembali mencoba juga sebuah kemenangan.",
+"Fokus pada kebiasaan, bukan hanya angka di timbangan.",
+"Versi terbaik dirimu dibangun dari keputusan kecil yang diulang."
+];
+const quoteForToday=()=>{let d=new Date();let day=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(d.getFullYear(),0,1))/86400000);return quotes[day%quotes.length]};
+const defaultData={settings:{wakeTime:"04:45",morningTime:"05:30",breakfastTime:"07:15",leaveTime:"06:30",workTime:"07:30",eveningTime:"19:00",sleepTime:"22:00",target:63},weights:[{date:new Date().toISOString().slice(0,10),weight:75,waist:null}],checks:{},meals:{},foodNote:""};
+let data;try{data=JSON.parse(localStorage.getItem("glowupJourney")||"null")||defaultData}catch(e){data=defaultData}
+function persist(){localStorage.setItem("glowupJourney",JSON.stringify(data))}
+function toast(msg){let t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
+function tab(id,btn){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("active",b===btn));if(id==="progress")drawChart()}
+function dateKey(){return new Date().toISOString().slice(0,10)}
+function scheduleItems(){let s=data.settings;return [{id:"wake",time:s.wakeTime,label:"Bangun tidur",icon:"🌅"},{id:"morning",time:s.morningTime,label:"Workout pagi · 15 menit + treadmill 20 menit",icon:"💪"},{id:"breakfast",time:s.breakfastTime,label:"Sarapan (opsional)",icon:"🍳"},{id:"leave",time:s.leaveTime,label:"Berangkat kerja",icon:"👜"},{id:"work",time:s.workTime,label:"Mulai kerja",icon:"💻"},{id:"evening",time:s.eveningTime,label:"Workout malam / stretching",icon:"🌙"},{id:"sleep",time:s.sleepTime,label:"Mulai persiapan tidur",icon:"🛌"}]}
+function renderSchedule(){let checks=data.checks[dateKey()]||{};let items=scheduleItems();document.getElementById("scheduleList").innerHTML=items.map(x=>`<div class="item"><div class="ico">${x.icon}</div><div class="body"><strong>${x.label}</strong><small>${x.time}</small></div><button class="secondary" style="padding:7px 10px" onclick="toggleCheck('${x.id}')">${checks[x.id]?"✓":"○"}</button></div>`).join("");let n=Object.values(checks).filter(Boolean).length;document.getElementById("doneCount").textContent=n+"/"+items.length+" selesai"}
+function toggleCheck(id){if(!data.checks[dateKey()])data.checks[dateKey()]={};data.checks[dateKey()][id]=!data.checks[dateKey()][id];persist();renderSchedule()}
+const exercises=[["Pemanasan & mobilitas","3 menit","Gerakan bahu, pinggul, jalan di tempat","🧍🏻‍♂️"],["Sit-to-stand / squat ke kursi","3 menit","Gerak perlahan, lutut mengikuti arah jari kaki","🏋🏻‍♂️"],["Glute bridge","3 menit","Menguatkan bokong dan pinggul","🧘🏻‍♂️"],["Wall push-up + bird dog","3 menit","Kekuatan tubuh bagian atas dan stabilitas core","💪🏻"],["Dead bug atau marching core","3 menit","Jaga punggung nyaman, napas teratur","🤸🏻‍♂️"]];
+function renderExercises(){let c=data.checks[dateKey()]||{};document.getElementById("exerciseList").innerHTML=exercises.map((x,i)=>`<div class="exercise"><div class="row"><div><strong>${i+1}. ${x[0]}</strong><div class="mini">${x[1]} · ${x[2]}</div></div><button class="secondary" onclick="toggleCheck('ex${i}')">${c['ex'+i]?'✓':'Selesai'}</button></div></div>`).join("")}
+const foods=[
+{name:"Nasi putih",portion:"100 g",kcal:130,meal:"lunch"},{name:"Nasi putih",portion:"150 g",kcal:195,meal:"lunch"},{name:"Telur rebus",portion:"1 butir",kcal:75,meal:"breakfast"},{name:"Ayam panggang tanpa kulit",portion:"100 g",kcal:165,meal:"lunch"},{name:"Tempe goreng",portion:"2 potong kecil",kcal:150,meal:"lunch"},{name:"Sayur bening",portion:"1 mangkuk",kcal:40,meal:"lunch"},{name:"Soto ayam",portion:"1 mangkuk",kcal:300,meal:"lunch"},{name:"Gado-gado",portion:"1 porsi sedang",kcal:350,meal:"lunch"},{name:"Pisang",portion:"1 buah sedang",kcal:105,meal:"snack"},{name:"Roti tawar",portion:"2 lembar",kcal:160,meal:"breakfast"},{name:"Oatmeal matang",portion:"1 mangkuk (±200 g)",kcal:150,meal:"breakfast"},{name:"Kopi hitam tanpa gula",portion:"1 cangkir",kcal:5,meal:"drink"},{name:"Kopi susu gula",portion:"1 gelas sedang",kcal:140,meal:"drink"},{name:"Teh manis",portion:"1 gelas",kcal:90,meal:"drink"},{name:"Susu UHT plain",portion:"250 ml",kcal:150,meal:"drink"},{name:"Bakso",portion:"1 mangkuk",kcal:320,meal:"lunch"},{name:"Ikan bakar",portion:"100 g",kcal:170,meal:"dinner"},{name:"Kentang rebus",portion:"150 g",kcal:130,meal:"dinner"},{name:"Apel",portion:"1 buah sedang",kcal:95,meal:"snack"},{name:"Air putih",portion:"1 gelas",kcal:0,meal:"drink"}
+];
+const mealTypes=[["breakfast","Sarapan"],["lunch","Makan siang"],["dinner","Makan malam"],["snack","Camilan"],["drink","Minuman"]];
+function renderMeals(){let m=data.meals[dateKey()]||{};document.getElementById("mealList").innerHTML=mealTypes.map(([id,label])=>{let value=m[id]||"skip";return `<div class="meal"><div class="row"><strong>${label}</strong><span class="mini">${value==="skip"?"Tidak dicatat":(foods.find(f=>f.name+"|"+f.portion===value)?.kcal||0)+" kkal"}</span></div><select id="meal-${id}" onchange="mealChanged()"><option value="skip">Lewati / puasa / tidak diisi</option>${foods.map(f=>`<option value="${f.name}|${f.portion}" ${value===f.name+"|"+f.portion?"selected":""}>${f.name} — ${f.portion} (${f.kcal} kkal)</option>`).join("")}</select></div>`}).join("");document.getElementById("foodNote").value=data.foodNote||"";updateCalories()}
+function mealChanged(){let total=0;mealTypes.forEach(([id])=>{let v=document.getElementById("meal-"+id).value;if(v!=="skip"){let f=foods.find(x=>x.name+"|"+x.portion===v);if(f)total+=f.kcal}});document.getElementById("calorieTotal").textContent=total+" kkal"}
+function updateCalories(){mealChanged()}
+function saveFood(){let m={};mealTypes.forEach(([id])=>m[id]=document.getElementById("meal-"+id).value);data.meals[dateKey()]=m;data.foodNote=document.getElementById("foodNote").value;persist();toast("Jurnal makan disimpan di perangkat ini.")}
+function latest(){return data.weights[data.weights.length-1]||{weight:75,waist:null}}
+function saveWeight(){let w=parseFloat(document.getElementById("weightInput").value),wa=parseFloat(document.getElementById("waistInput").value);if(!w||w<30||w>300){toast("Masukkan berat yang valid.");return}let d=dateKey();let idx=data.weights.findIndex(x=>x.date===d);let entry={date:d,weight:w,waist:Number.isFinite(wa)?wa:null};if(idx>=0)data.weights[idx]=entry;else data.weights.push(entry);data.weights.sort((a,b)=>a.date.localeCompare(b.date));persist();renderProgress();renderHome();toast("Pengukuran tersimpan.")}
+function renderProgress(){let l=latest();document.getElementById("progressWeight").textContent=l.weight+" kg";document.getElementById("waistShow").textContent=l.waist?l.waist+" cm":"— cm";document.getElementById("history").innerHTML=[...data.weights].reverse().slice(0,10).map(x=>`<div class="item"><div class="body"><strong>${x.date}</strong><small>Lingkar pinggang: ${x.waist||"belum dicatat"} ${x.waist?"cm":""}</small></div><strong>${x.weight} kg</strong></div>`).join("");drawChart()}
+function drawChart(){let c=document.getElementById("chart");if(!c)return;let ctx=c.getContext("2d"),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);let vals=data.weights.map(x=>x.weight);if(vals.length===0)return;let min=Math.min(...vals)-1,max=Math.max(...vals)+1;if(max===min)max=min+1;ctx.strokeStyle="#e1e8df";ctx.lineWidth=1;for(let i=0;i<4;i++){let y=20+i*(h-45)/3;ctx.beginPath();ctx.moveTo(40,y);ctx.lineTo(w-15,y);ctx.stroke()}ctx.strokeStyle="#43866d";ctx.lineWidth=4;ctx.beginPath();vals.forEach((v,i)=>{let x=40+(vals.length===1?0:i*(w-70)/(vals.length-1)),y=20+(max-v)*(h-45)/(max-min);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();vals.forEach((v,i)=>{let x=40+(vals.length===1?0:i*(w-70)/(vals.length-1)),y=20+(max-v)*(h-45)/(max-min);ctx.fillStyle="#43866d";ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill()})}
+function renderHome(){let l=latest(),target=Number(data.settings.target)||63;document.getElementById("currentWeight").textContent=l.weight;document.getElementById("targetShow").textContent=target+" kg";document.getElementById("progressWeight").textContent=l.weight+" kg";document.getElementById("weightChange").textContent=(l.weight>target?(l.weight-target).toFixed(1)+" kg menuju target":"Target tercapai 🎉");let pct=Math.max(0,Math.min(100,((75-l.weight)/(75-target))*100));document.getElementById("percent").textContent=Math.round(pct)+"%";document.getElementById("progressBar").style.width=pct+"%";document.getElementById("progressText").textContent="Data terakhir: "+l.weight+" kg. Tren lebih bermakna daripada angka satu hari.";document.getElementById("today").textContent=new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).toUpperCase();document.getElementById("quote").textContent="“"+quoteForToday()+"”";renderSchedule()}
+function loadSettings(){let s=data.settings;for(let k of ["wakeTime","morningTime","breakfastTime","leaveTime","workTime","eveningTime","sleepTime"])document.getElementById(k).value=s[k];document.getElementById("targetInput").value=s.target}
+function saveSettings(){let s={};for(let k of ["wakeTime","morningTime","breakfastTime","leaveTime","workTime","eveningTime","sleepTime"])s[k]=document.getElementById(k).value;s.target=Number(document.getElementById("targetInput").value)||63;data.settings=s;persist();renderHome();toast("Pengaturan jadwal disimpan.")}
+function markWorkout(){if(!data.checks[dateKey()])data.checks[dateKey()]={};data.checks[dateKey()].morning=true;persist();renderSchedule();toast("Mantap! Workout ditandai selesai.")}
+function exportData(){let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="glowup-journey-data.json";a.click();URL.revokeObjectURL(a.href)}
+document.getElementById("today").textContent=new Date().toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).toUpperCase();
+renderHome();renderExercises();renderMeals();renderProgress();loadSettings();
+</script>
+
+<script>
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "GlowUp Journey",
+  "short_name": "GlowUp",
+  "description": "Personal wellness, weight, workout, and food tracker.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f6ed",
+  "theme_color": "#dcebdd",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
