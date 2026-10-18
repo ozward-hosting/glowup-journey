@@ -267,5 +267,266 @@ initFoodCategories();renderFoodResults();loadSettings();renderProfile();renderHo
 if(!state.profile&&appMode!=='demo'){document.getElementById('profileOverlay').classList.add('show')}else{document.getElementById('profileOverlay').classList.remove('show')}
 window.addEventListener('resize',()=>{clearTimeout(window._chartResize);window._chartResize=setTimeout(resizeCharts,150)});
 </script>
-<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=11-treadmill-fix',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
+<style>
+/* v12: keep the longer account form usable on small phone screens */
+.login-gate{overflow-y:auto;align-items:flex-start;-webkit-overflow-scrolling:touch}
+.login-card{margin:auto}
+.cloud-setup-note{font-size:11px!important;line-height:1.45;background:#f7f0df;padding:10px;border-radius:12px;margin-top:8px}
+.cloud-status{font-size:12px;line-height:1.45;min-height:18px;margin-top:10px;color:#456b55;overflow-wrap:anywhere}
+.cloud-divider{height:1px;background:#e0e8df;margin:18px 0}
+.cloud-btn-alt{background:#edf4ed!important;color:#173f35!important;border:1px solid #dce7dc!important}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  'use strict';
+  const PROJECT_URL = 'https://lpvstydmvxnjhunlszok.supabase.co';
+  const KEY_STORAGE = 'glowupSupabasePublishableKey';
+  const EMAIL_REDIRECT = 'https://ozward-hosting.github.io/glowup-journey/';
+  let client = null;
+  let cloudUser = null;
+  let cloudReady = false;
+  let saveTimer = null;
+  let saveErrorShown = false;
+  const oldPersist = window.persist;
+  const oldRenderProfile = window.renderProfile;
+  const oldEnterDemo = window.enterDemo;
+  const oldLocalLogout = window.localLogout;
+
+  function status(message, isError=false){
+    const el = document.getElementById('glowupCloudStatus');
+    if(el){ el.textContent = message || ''; el.style.color = isError ? '#a64232' : '#456b55'; }
+  }
+  function makeClient(key){
+    if(!window.supabase || typeof window.supabase.createClient !== 'function'){
+      throw new Error('Komponen koneksi Supabase belum termuat. Pastikan internet aktif lalu muat ulang halaman.');
+    }
+    if(!key || !(key.startsWith('sb_publishable_') || key.startsWith('eyJ')) || key.startsWith('sb_secret_')){
+      throw new Error('Masukkan Publishable key, bukan Secret key.');
+    }
+    return window.supabase.createClient(PROJECT_URL, key, {
+      auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:true}
+    });
+  }
+  function currentClient(){
+    if(client) return client;
+    const key = localStorage.getItem(KEY_STORAGE) || '';
+    if(key) client = makeClient(key);
+    return client;
+  }
+  function meaningful(s){
+    if(!s) return false;
+    if(s.profile) return true;
+    if((s.weights||[]).length > 1) return true;
+    for(const k of ['checks','meals','water','foodNotes','workouts','eveningWorkouts']){
+      if(s[k] && Object.keys(s[k]).length) return true;
+    }
+    if((s.customFoods||[]).length) return true;
+    const settings = normalizedSettings(s.settings||{});
+    return Object.keys(DEFAULT_SETTINGS).some(k => settings[k] !== DEFAULT_SETTINGS[k]);
+  }
+  function normalizedState(input){
+    const merged = migrateLegacyFoodData({...defaultState(), ...(input||{})});
+    merged.settings = normalizedSettings((input||{}).settings||{});
+    merged.eveningWorkouts = merged.eveningWorkouts || {};
+    merged.version = 2;
+    return merged;
+  }
+  async function writeCloud(showStatus=false){
+    if(!client || !cloudUser || !cloudReady || appMode === 'demo') return;
+    const snapshot = JSON.parse(JSON.stringify(state));
+    const {error} = await client.from('glowup_user_data').upsert({
+      user_id: cloudUser.id,
+      data: snapshot,
+      updated_at: new Date().toISOString()
+    }, {onConflict:'user_id'});
+    if(error){
+      if(showStatus || !saveErrorShown){
+        toast('Data belum tersinkron online. Periksa koneksi akun.');
+        status('Belum tersinkron ke cloud: ' + (error.message || 'periksa koneksi database.'), true);
+        saveErrorShown = true;
+      }
+      throw error;
+    }
+    saveErrorShown = false;
+    status('Tersimpan online · akun ' + (cloudUser.email || 'GlowUp'));
+  }
+  function redrawApp(){
+    const gate = document.getElementById('loginGate');
+    if(gate) gate.style.display = 'none';
+    const demo = document.getElementById('demoBanner');
+    if(demo) demo.style.display = 'none';
+    initFoodCategories();
+    renderFoodResults();
+    loadSettings();
+    renderProfile();
+    renderHome();
+    renderWorkout();
+    renderFoodDiary();
+    renderProgress();
+    renderInsights();
+    if(!state.profile) openProfile();
+    else document.getElementById('profileOverlay').classList.remove('show');
+  }
+  async function activateUser(user){
+    const localSnapshot = normalizedState(state);
+    client = currentClient();
+    if(!client) throw new Error('Publishable key belum disimpan.');
+    cloudUser = user;
+    cloudReady = false;
+    const {data:row, error} = await client.from('glowup_user_data')
+      .select('data').eq('user_id', user.id).maybeSingle();
+    if(error) throw new Error('Login berhasil, tetapi database belum bisa dibaca: ' + error.message);
+    if(row && row.data && typeof row.data === 'object'){
+      state = normalizedState(row.data);
+      status('Data online berhasil dimuat.');
+    } else {
+      state = localSnapshot;
+      if(meaningful(localSnapshot)){
+        const {error:saveError} = await client.from('glowup_user_data').upsert({
+          user_id:user.id, data:localSnapshot, updated_at:new Date().toISOString()
+        }, {onConflict:'user_id'});
+        if(saveError) throw new Error('Akun sudah masuk, tetapi data perangkat belum bisa dipindahkan: ' + saveError.message);
+        status('Data lama dari perangkat berhasil dipindahkan ke cloud.');
+      } else {
+        status('Akun terhubung. Data baru akan tersimpan online otomatis.');
+      }
+    }
+    appMode = 'private';
+    sessionStorage.setItem('glowupMode','private');
+    sessionStorage.setItem('glowupLocalUnlocked','yes');
+    cloudReady = true;
+    oldPersist();
+    redrawApp();
+    const label = document.getElementById('profileSubLabel');
+    if(label) label.textContent = 'Cloud tersinkron';
+  }
+
+  // Replace the old device-only login gate with real Supabase account login.
+  const gate = document.getElementById('loginGate');
+  if(gate){
+    gate.innerHTML = `
+      <form class="login-card" id="glowupAuthForm" onsubmit="return glowupAuthAction(event,'signin')">
+        <div class="login-mark">🌿</div>
+        <div class="tagline">STRONGER HABITS · A HEALTHIER YOU</div>
+        <h1>GlowUp Journey</h1>
+        <p>Masuk dengan akun online agar catatanmu tersimpan dan bisa dibuka lagi dari perangkat lain.</p>
+        <label for="glowupPublishableKey">Koneksi database · cukup sekali</label>
+        <input id="glowupPublishableKey" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Tempel sb_publishable_..." aria-label="Supabase Publishable key">
+        <button type="button" class="secondary cloud-btn-alt" onclick="glowupSaveConnection()">Simpan koneksi database</button>
+        <p class="cloud-setup-note">Ambil key dari Supabase → Project Settings → API Keys → Publishable key. Jangan masukkan Secret key. URL project sudah disiapkan.</p>
+        <div class="cloud-divider"></div>
+        <label for="glowupEmail">Email akun</label>
+        <input id="glowupEmail" type="email" autocomplete="email" autocapitalize="off" required placeholder="Email yang bisa kamu buka">
+        <label for="glowupPassword">Password akun</label>
+        <input id="glowupPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="Minimal 6 karakter">
+        <button type="submit" id="glowupSignInButton">Masuk ke akun</button>
+        <button type="button" class="secondary cloud-btn-alt" onclick="glowupAuthAction(null,'signup')">Buat akun baru</button>
+        <div class="cloud-status" id="glowupCloudStatus" role="status" aria-live="polite"></div>
+        <div class="cloud-divider"></div>
+        <button type="button" class="secondary demo-launch" onclick="enterDemo()">Lihat akun demo · data contoh</button>
+      </form>`;
+    gate.style.display = appMode === 'demo' ? 'none' : 'flex';
+    const field = document.getElementById('glowupPublishableKey');
+    if(field) field.value = localStorage.getItem(KEY_STORAGE) || '';
+  }
+
+  window.glowupSaveConnection = function(){
+    try{
+      const key = (document.getElementById('glowupPublishableKey').value||'').trim();
+      const testClient = makeClient(key);
+      localStorage.setItem(KEY_STORAGE,key);
+      client = testClient;
+      status('Koneksi disimpan di perangkat ini. Berikutnya masuk atau buat akun.');
+      toast('Koneksi database disimpan.');
+    }catch(err){ status(err.message || 'Key belum benar.', true); }
+  };
+  window.glowupAuthAction = async function(event,mode='signin'){
+    if(event && typeof event.preventDefault==='function') event.preventDefault();
+    const email = (document.getElementById('glowupEmail')?.value||'').trim().toLowerCase();
+    const password = document.getElementById('glowupPassword')?.value||'';
+    if(!email || !password){ status('Isi email dan password terlebih dahulu.', true); return false; }
+    try{
+      client = currentClient();
+      if(!client){ status('Tempel dan simpan Publishable key terlebih dahulu.', true); return false; }
+      const button = document.getElementById('glowupSignInButton');
+      if(button){button.disabled=true;button.textContent=mode==='signup'?'Membuat akun...':'Sedang masuk...';}
+      status(mode==='signup'?'Membuat akun online...':'Menghubungkan akun dan memuat data...');
+      if(mode==='signup'){
+        const {data,error} = await client.auth.signUp({email,password,options:{emailRedirectTo:EMAIL_REDIRECT}});
+        if(error) throw error;
+        if(data.session && data.user){
+          await activateUser(data.user);
+          toast('Akun berhasil dibuat dan tersambung.');
+        } else {
+          status('Akun berhasil dibuat. Buka email untuk konfirmasi, lalu kembali ke aplikasi dan masuk. Jika tautan tidak kembali ke GlowUp, URL perlu ditambahkan ke Supabase Auth → URL Configuration.');
+        }
+      } else {
+        const {data,error} = await client.auth.signInWithPassword({email,password});
+        if(error) throw error;
+        if(!data.user) throw new Error('Akun belum ditemukan. Pilih Buat akun baru jika ini pertama kali.');
+        await activateUser(data.user);
+        toast('Berhasil masuk. Data GlowUp siap disimpan online.');
+      }
+    }catch(err){
+      status(err.message || 'Belum bisa masuk. Periksa email, password, koneksi, dan pengaturan Supabase.', true);
+    }finally{
+      const button = document.getElementById('glowupSignInButton');
+      if(button){button.disabled=false;button.textContent='Masuk ke akun';}
+    }
+    return false;
+  };
+  window.persist = function(){
+    oldPersist();
+    if(appMode === 'demo' || !cloudUser || !cloudReady || !client) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>{ writeCloud(false).catch(()=>{}); }, 900);
+  };
+  window.renderProfile = function(){
+    oldRenderProfile();
+    const label=document.getElementById('profileSubLabel');
+    if(label){
+      if(appMode==='demo') label.textContent='Mode demo · data contoh';
+      else if(cloudUser && cloudReady) label.textContent='Cloud tersinkron';
+      else label.textContent='Profil lokal';
+    }
+  };
+  window.localLogout = async function(){
+    try{ if(client) await client.auth.signOut(); }catch(e){}
+    cloudUser=null; cloudReady=false;
+    sessionStorage.removeItem('glowupLocalUnlocked');
+    sessionStorage.removeItem('glowupMode');
+    location.reload();
+  };
+  window.enterDemo = async function(){
+    try{if(client) await client.auth.signOut();}catch(e){}
+    cloudUser=null; cloudReady=false;
+    oldEnterDemo();
+  };
+
+  // Restore a previously signed-in cloud account; otherwise leave the login gate visible.
+  async function boot(){
+    if(appMode==='demo'){
+      if(gate) gate.style.display='none';
+      const demo=document.getElementById('demoBanner'); if(demo) demo.style.display='flex';
+      return;
+    }
+    if(gate) gate.style.display='flex';
+    try{
+      client = currentClient();
+      if(!client) return;
+      const {data,error}=await client.auth.getSession();
+      if(error) throw error;
+      if(data.session && data.session.user){
+        await activateUser(data.session.user);
+      }
+    }catch(err){
+      status(err.message || 'Koneksi belum siap. Simpan Publishable key dan coba lagi.', true);
+    }
+  }
+  boot();
+})();
+</script>
+
+<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=12-supabase-cloud-sync',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
 </body></html>

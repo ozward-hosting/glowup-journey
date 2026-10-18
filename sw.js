@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glowup-journey-v11-treadmill-fix';
+const CACHE_NAME = 'glowup-journey-v12-supabase-cloud-sync';
 const ASSETS = [
   './','./index.html','./manifest.webmanifest','./icon.svg','./apple-touch-icon.png',
   './hero-art.png','./hero-character.jpg',
