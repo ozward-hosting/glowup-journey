@@ -1,4 +1,4 @@
-const CACHE_NAME = 'glowup-journey-v1.19-workout-image-hd';
+const CACHE_NAME = 'glowup-journey-v1.20-workout-photo-assets';
 const ASSETS = [
   './','./index.html','./manifest.webmanifest','./icon.svg','./apple-touch-icon.png',
   './hero-art.png','./hero-character.jpg',
