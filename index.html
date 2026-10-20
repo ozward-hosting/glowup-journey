@@ -284,7 +284,7 @@ window.addEventListener('resize',()=>{clearTimeout(window._chartResize);window._
 .glowup-auth-notice button{position:absolute;right:7px;top:7px;background:transparent;color:#215542;padding:5px 8px;margin:0;width:auto;border-radius:8px;font-size:18px;}
 .signup-only{display:none;}
 
-/* v16: mobile-friendly authentication, clear inline feedback, and persistent branding footer */
+/* v17: fix auth initialization order; preserve inline feedback and persistent branding footer */
 .login-gate{overflow-y:auto;align-items:flex-start;justify-content:center;padding:calc(18px + env(safe-area-inset-top)) 14px calc(50px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
 .login-card{margin:auto;max-height:none;box-sizing:border-box}
 .cloud-status{display:block;font-size:13px;line-height:1.45;min-height:0;margin:12px 0 0;padding:0;border:1px solid transparent;border-radius:12px;overflow-wrap:anywhere;white-space:pre-wrap;scroll-margin:18px}
@@ -587,7 +587,7 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
         <div class="cloud-divider"></div><button type="button" class="secondary demo-launch" onclick="enterDemo()">Lihat akun demo · data contoh</button>
       </form>`;
     gate.style.display=appMode==='demo'?'none':'flex';
-    setGlowupAuthMode('signin');
+    // Auth-mode handler is defined immediately after this block; invoke it only after assignment.
     const field=document.getElementById('glowupPublishableKey');
     if(field)field.value=localStorage.getItem(KEY_STORAGE)||'';
   }
@@ -605,6 +605,9 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
     if(email)email.setCustomValidity('');
     status(authMode==='signup'?'Daftar akun baru: isi nama tampilan, email, dan password.':'Masuk dengan email dan password akunmu.',false);
   };
+  // Initialize the form only after the handler exists. A call before this point aborts the entire
+  // auth script, leaving a visible form whose login and sign-up controls do nothing.
+  window.setGlowupAuthMode('signin');
 
   window.glowupResendVerification = async function(){
     const email=(document.getElementById('glowupEmail')?.value||'').trim().toLowerCase();
@@ -792,7 +795,7 @@ Detail: ${message}`:''),true);
 </script>
 
 <script>
-// v16: expose the workout-session control explicitly for inline button handlers on iOS.
+// v17: expose the workout-session control explicitly for inline button handlers on iOS.
 window.setWorkoutSession=function(session,button){
   if(session!=='morning'&&session!=='evening')return;
   try{
@@ -806,6 +809,6 @@ window.setWorkoutSession=function(session,button){
   }
 };
 </script>
-<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=16-auth-feedback-footer',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
-<div class="ozward-footer" role="contentinfo">© Ozward 2027 · glowup-journey v16</div>
+<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=17-login-init-fix',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
+<div class="ozward-footer" role="contentinfo">© Ozward 2027 · glowup-journey v17</div>
 </body></html>
