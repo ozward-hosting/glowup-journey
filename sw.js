@@ -1,9 +1,20 @@
-const CACHE_NAME = 'glowup-journey-v1.17-weekly-workout';
+const CACHE_NAME = 'glowup-journey-v1.19-workout-image-hd';
 const ASSETS = [
   './','./index.html','./manifest.webmanifest','./icon.svg','./apple-touch-icon.png',
   './hero-art.png','./hero-character.jpg',
-  './workout-chair-squat.jpg','./workout-glute-bridge.jpg','./workout-shoulder-press.jpg','./workout-one-arm-row.jpg','./workout-dead-bug.jpg',
-  './workout-romanian-deadlift.jpg','./workout-wall-pushup.jpg','./workout-lateral-raise.jpg','./workout-chair-squat-b.jpg','./workout-bird-dog.jpg'
+  './workout-bird-dog.jpg',
+  './workout-chair-squat-b.jpg',
+  './workout-chair-squat.jpg',
+  './workout-dead-bug.jpg',
+  './workout-glute-bridge.jpg',
+  './workout-lateral-raise.jpg',
+  './workout-one-arm-row.jpg',
+  './workout-plank.jpg',
+  './workout-reverse-crunch.jpg',
+  './workout-romanian-deadlift.jpg',
+  './workout-shoulder-press.jpg',
+  './workout-side-plank.jpg',
+  './workout-wall-pushup.jpg'
 ];
 self.addEventListener('install', event => {
   event.waitUntil((async () => {

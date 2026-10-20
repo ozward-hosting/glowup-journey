@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="id">
 <head>
-<!-- GlowUp Journey release: v1.17 | Workout weekly plan -->
+<!-- GlowUp Journey release: v1.19 | Workout image HD enhancement -->
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#dbece1"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="GlowUp Journey">
 <title>GlowUp Journey</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -231,7 +231,7 @@ function renderBMI(){const w=latestWeight(),heightCm=Number(state.profile?.heigh
 
 function renderHome(){const w=latestWeight(),hasWeight=state.weights.length>0&&Number.isFinite(Number(w.weight)),s=state.settings,target=Number(s.target)||63;document.getElementById('todayLabel').textContent=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();document.getElementById('quote').textContent='“'+quoteToday()+'”';document.getElementById('heroGreeting').textContent=`Hai${state.profile?.name?' '+state.profile.name:''}! Hari ini kesempatan baru untuk merawat diri.`;document.getElementById('homeWeight').textContent=hasWeight?Number(w.weight).toFixed(1):'—';document.getElementById('homeTarget').textContent=target;document.getElementById('remainingWeight').textContent=hasWeight?(w.weight>target?`${(w.weight-target).toFixed(1)} kg menuju target`:'Target tercapai!'):'Isi profilmu untuk mulai';const hist=[...state.weights].sort((a,b)=>a.date.localeCompare(b.date));document.getElementById('weightTrend').textContent=hist.length>1?`${hist[0].weight} kg awal · ${hist.at(-1).weight} kg terakhir`:'Mulai catat trenmu';document.getElementById('homeCalories').textContent=dailyCalories().toLocaleString('id-ID');document.getElementById('calorieSub').textContent=`Target ${Number(s.calorieTarget||2000).toLocaleString('id-ID')} kkal`;document.getElementById('homeStreak').textContent=streak();document.getElementById('homeWaist').textContent=hasWeight&&w.waist?`${w.waist} cm`:'— cm';document.getElementById('homeWorkouts').textContent=`${workoutsThisWeek()} kali`;document.getElementById('homeWater').textContent=`${(Number(state.water[dateKey()]||0)/250).toFixed(0)} / ${Math.round(Number(s.waterTarget||2)*4)} gelas`;renderBMI();renderSchedule();renderReview();drawChart(document.getElementById('homeChart'),state.weights,'weight','#3e8065',true)}
 
-// GlowUp Journey v1.17 — weekly Workout A/B, cardio/core, and two-pose artwork.
+// GlowUp Journey v1.19 — Workout image HD enhancement.
 const WORKOUT_PLANS={
  A:{type:'A',title:'Workout A · Full body',short:'Workout A',focus:'Perut · paha · bahu',duration:'15–18 menit',minutes:17,summary:'Latihan kekuatan ringan untuk paha, core, dan bahu.',moves:[
   {name:'Chair squat',reps:'10–12 repetisi',sets:'2 set',rest:'20–30 detik',desc:'Berdiri di depan kursi stabil, kaki selebar bahu. Dorong pinggul ke belakang lalu duduk terkendali; berdiri lagi tanpa mengayun.',image:'workout-chair-squat.jpg',caption:'Posisi awal → posisi turun'},
@@ -280,7 +280,7 @@ function renderWeeklyWorkoutPlan(today=new Date()){
 function movementCardHtml(move,index,prefix,c){
  const key=prefix+index,done=c[key]===true;
  const restLabel=String(move.rest||'30 detik');
- return `<article class="movement-card${done?' is-done':''}"><div class="movement-art"><img src="${move.image}" alt="Ilustrasi dua pose untuk ${escapeHTML(move.name)}" loading="lazy"><div class="movement-caption">${(move.caption||'').includes(' → ')?`<span>${escapeHTML(move.caption.split(' → ')[0])}</span><span class="arrow">→</span><span>${escapeHTML(move.caption.split(' → ').slice(1).join(' → '))}</span>`:`<span>${escapeHTML(move.caption||'Ikuti ilustrasi gerakan')}</span>`}</div></div><div class="movement-copy"><div class="movement-title-row"><h3><span class="movement-number">${index+1}</span>${escapeHTML(move.name)}</h3></div><p class="movement-description">${escapeHTML(move.desc)}</p><div class="movement-pills"><span class="movement-pill">${escapeHTML(move.reps)}</span><span class="movement-pill">${escapeHTML(move.sets)}</span><span class="movement-pill">Istirahat ${escapeHTML(restLabel)}</span></div><button class="small-btn ${done?'done':'secondary'}" onclick="${prefix==='ex'?'toggleExercise':'toggleEveningExercise'}(${index})">${done?'✓ Selesai':'Tandai selesai'}</button></div></article>`;
+ return `<article class="movement-card${done?' is-done':''}"><div class="movement-art"><div class="movement-image-frame"><img src="${move.image}" alt="Ilustrasi dua pose untuk ${escapeHTML(move.name)}" loading="lazy"></div><div class="movement-caption">${(move.caption||'').includes(' → ')?`<span>${escapeHTML(move.caption.split(' → ')[0])}</span><span class="arrow">→</span><span>${escapeHTML(move.caption.split(' → ').slice(1).join(' → '))}</span>`:`<span>${escapeHTML(move.caption||'Ikuti ilustrasi gerakan')}</span>`}</div></div><div class="movement-copy"><div class="movement-title-row"><h3><span class="movement-number">${index+1}</span>${escapeHTML(move.name)}</h3></div><p class="movement-description">${escapeHTML(move.desc)}</p><div class="movement-pills"><span class="movement-pill">${escapeHTML(move.reps)}</span><span class="movement-pill">${escapeHTML(move.sets)}</span><span class="movement-pill">Istirahat ${escapeHTML(restLabel)}</span></div><button class="small-btn ${done?'done':'secondary'}" onclick="${prefix==='ex'?'toggleExercise':'toggleEveningExercise'}(${index})">${done?'✓ Selesai':'Tandai selesai'}</button></div></article>`;
 }
 function renderMoveList(targetId,prefix,plan,c){
  const target=document.getElementById(targetId);if(!target)return;
@@ -405,7 +405,7 @@ body{padding-bottom:24px}
 @media(max-width:480px){.login-card{padding:22px 19px;border-radius:24px}.login-card h1{font-size:26px}}
 
 
-/* GlowUp Journey v1.17 — weekly plan and two-pose exercise cards */
+/* GlowUp Journey v1.19 — Workout image HD enhancement only */
 .weekly-plan-wrap{padding:12px;margin-bottom:12px;background:linear-gradient(140deg,#fffef9,#f4f7ec)}
 .weekly-workout-plan{display:flex;gap:7px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .week-day-card{flex:0 0 116px;min-width:0;border:1px solid #e2e9dd;border-radius:14px;padding:10px 9px;background:#fffefb;scroll-snap-align:start;box-shadow:0 3px 10px #214f3d07}
@@ -419,10 +419,12 @@ body{padding-bottom:24px}
 .exercise-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 .movement-card{display:grid;grid-template-columns:1fr;gap:9px;align-items:stretch;border:1px solid var(--line);border-radius:17px;background:#fffef9;padding:10px;min-width:0;overflow:hidden}
 .movement-card.is-done{border-color:#9bc8a6;background:#f7fbf4}
-.movement-art{position:relative;width:100%;height:152px;border-radius:13px;background:linear-gradient(140deg,#e7f1e3,#fbf0dc);overflow:hidden;display:grid;place-items:center}
-.movement-art img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;border-radius:12px;animation:workoutPairFloat 2.8s ease-in-out infinite alternate;will-change:transform}
-@keyframes workoutPairFloat{0%{transform:translateY(1px) scale(1)}100%{transform:translateY(-2px) scale(1.012)}}
-.movement-caption{display:flex;justify-content:center;align-items:center;gap:8px;font-size:10px;color:#718579;margin-top:5px;font-weight:750}
+/* Keep the complete 2-pose source image visible; don't let the caption share a clipped fixed-height image box. */
+.movement-art{position:relative;width:100%;border-radius:13px;background:transparent;overflow:visible;display:flex;flex-direction:column;align-items:stretch;gap:4px;min-width:0}
+.movement-image-frame{position:relative;width:100%;height:clamp(180px,55vw,250px);border-radius:13px;background:linear-gradient(140deg,#e7f1e3,#fbf0dc);overflow:hidden;display:flex;justify-content:center;align-items:center;padding:4px;min-width:0}
+.movement-image-frame img{display:block;width:auto!important;height:auto!important;max-width:100%;max-height:100%;object-fit:contain!important;object-position:center;border-radius:10px;animation:workoutPairFloat 2.8s ease-in-out infinite alternate;will-change:transform}
+@keyframes workoutPairFloat{0%{transform:translateY(0)}100%{transform:translateY(-1px)}}
+.movement-caption{display:flex;justify-content:center;align-items:center;gap:8px;min-height:19px;font-size:10px;color:#718579;margin:0;font-weight:750;line-height:1.25;text-align:center;flex-wrap:wrap}
 .movement-caption .arrow{color:#378363;font-size:15px;font-weight:900}
 .movement-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .movement-title-row h3{font-size:14px;margin:0;color:var(--deep);line-height:1.3;overflow-wrap:anywhere}
@@ -441,9 +443,9 @@ body{padding-bottom:24px}
 .routine-tip-grid>div{background:#f5f6ed;border-radius:13px;padding:10px}
 .routine-tip-grid strong{font-size:12px;color:var(--deep)}
 .routine-tip-grid p{font-size:11px;line-height:1.45;color:var(--muted);margin:5px 0 0}
-@media(min-width:620px){.exercise-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.movement-art{height:175px}.routine-tip-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:390px){.week-day-card{flex-basis:105px}.movement-art{height:135px}.movement-title-row h3{font-size:13px}}
-@media(prefers-reduced-motion:reduce){.movement-art img{animation:none;will-change:auto}}
+@media(min-width:620px){.exercise-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.movement-image-frame{height:clamp(190px,25vw,240px)}.routine-tip-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:390px){.week-day-card{flex-basis:105px}.movement-image-frame{height:180px}.movement-title-row h3{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.movement-image-frame img{animation:none;will-change:auto}}
 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -957,6 +959,6 @@ window.setWorkoutSession=function(session,button){
   }
 };
 </script>
-<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=1.17-weekly-workout',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
-<div class="ozward-footer" role="contentinfo">© Ozward 2027 · glowup-journey v1.17</div>
+<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=1.19-workout-image-hd',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
+<div class="ozward-footer" role="contentinfo">© Ozward 2027 · glowup-journey v1.19</div>
 </body></html>

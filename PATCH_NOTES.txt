@@ -1,0 +1,7 @@
+GlowUp Journey v1.19 — Workout image HD enhancement
+
+Only the 13 Workout exercise JPG files were upscaled from their existing 640x400 source to 1600x1000, with very mild sharpening and contrast enhancement to improve appearance on high-density phone displays. The original artwork and composition are preserved.
+
+The index.html and sw.js files are included only to update the displayed version/cache revision and to precache all Workout images. No login/authentication, profile, food, progress, or settings logic was changed intentionally.
+
+Upload all files in this patch to the repository root, replacing index.html, sw.js, and the existing workout-*.jpg files. Commit to main.
