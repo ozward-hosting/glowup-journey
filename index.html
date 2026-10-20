@@ -283,6 +283,20 @@ window.addEventListener('resize',()=>{clearTimeout(window._chartResize);window._
 .glowup-auth-notice{position:relative;margin:0 0 14px;padding:13px 42px 13px 14px;border:1px solid #cde2d0;background:#eef7ee;color:#215542;border-radius:14px;font-size:13px;line-height:1.5;box-shadow:0 4px 14px #173f3508;}
 .glowup-auth-notice button{position:absolute;right:7px;top:7px;background:transparent;color:#215542;padding:5px 8px;margin:0;width:auto;border-radius:8px;font-size:18px;}
 .signup-only{display:none;}
+
+/* v16: mobile-friendly authentication, clear inline feedback, and persistent branding footer */
+.login-gate{overflow-y:auto;align-items:flex-start;justify-content:center;padding:calc(18px + env(safe-area-inset-top)) 14px calc(50px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.login-card{margin:auto;max-height:none;box-sizing:border-box}
+.cloud-status{display:block;font-size:13px;line-height:1.45;min-height:0;margin:12px 0 0;padding:0;border:1px solid transparent;border-radius:12px;overflow-wrap:anywhere;white-space:pre-wrap;scroll-margin:18px}
+.cloud-status:empty{display:none}
+.cloud-status[data-error="true"]{background:#fff0ed!important;color:#8f2e25!important;border-color:#edc4bd!important;padding:12px 13px!important}
+.cloud-status[data-error="false"]{background:#eef7ee;color:#215542;border-color:#cde2d0;padding:12px 13px}
+#glowupAuthSubmit:disabled{opacity:.72;cursor:wait}
+.ozward-footer{position:fixed;z-index:100001;left:0;right:0;bottom:0;padding:6px 12px calc(6px + env(safe-area-inset-bottom));text-align:center;font-size:10px;line-height:1.25;letter-spacing:.2px;color:#5f786a;background:rgba(249,248,238,.96);border-top:1px solid #dce7dc;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);pointer-events:none}
+.app{padding-bottom:58px!important}
+body{padding-bottom:24px}
+@media(max-width:480px){.login-card{padding:22px 19px;border-radius:24px}.login-card h1{font-size:26px}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -305,19 +319,24 @@ window.addEventListener('resize',()=>{clearTimeout(window._chartResize);window._
   const oldLocalLogout = window.localLogout;
 
   function status(message, isError=false){
-    const el = document.getElementById('glowupCloudStatus');
-    if(el){
-      el.textContent = message || '';
-      el.style.color = isError ? '#8f2e25' : '#215542';
-      el.style.background = isError ? '#fff0ed' : '#eef7ee';
-      el.style.borderColor = isError ? '#edc4bd' : '#cde2d0';
-      el.style.padding = message ? '12px 13px' : '0';
-      el.style.minHeight = message ? '18px' : '0';
-      el.style.marginBottom = message ? '12px' : '0';
-      el.setAttribute('data-error', isError ? 'true' : 'false');
-      if(message && (isError || /berhasil|verifikasi|buat akun|masuk/i.test(message))){
-        try{ el.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(e){}
-      }
+    const el=document.getElementById('glowupCloudStatus');
+    if(!el)return;
+    el.textContent=message||'';
+    el.setAttribute('data-error',isError?'true':'false');
+    el.setAttribute('role',isError?'alert':'status');
+    el.setAttribute('aria-live',isError?'assertive':'polite');
+    el.style.display=message?'block':'none';
+    if(message){
+      el.style.color=isError?'#8f2e25':'#215542';
+      el.style.background=isError?'#fff0ed':'#eef7ee';
+      el.style.borderColor=isError?'#edc4bd':'#cde2d0';
+      el.style.padding='12px 13px';
+      el.style.minHeight='18px';
+      el.style.marginTop='12px';
+      el.style.marginBottom='8px';
+      try{el.scrollIntoView({behavior:'smooth',block:'nearest'});}catch(e){}
+    }else{
+      el.style.padding='0';el.style.minHeight='0';el.style.margin='0';
     }
   }
   function makeClient(key){
@@ -427,42 +446,54 @@ window.addEventListener('resize',()=>{clearTimeout(window._chartResize);window._
     status('Data tersimpan online di akun ' + (cloudUser.email || 'GlowUp'));
   }
   function redrawApp(){
-    const gate = document.getElementById('loginGate');
-    if(gate) gate.style.display = 'none';
-    const demo = document.getElementById('demoBanner');
-    if(demo) demo.style.display = 'none';
-    initFoodCategories();
-    renderFoodResults();
-    loadSettings();
-    renderProfile();
-    renderHome();
-    renderWorkout();
-    renderFoodDiary();
-    renderProgress();
-    renderInsights();
-    if(!state.profile) openProfile();
-    else document.getElementById('profileOverlay').classList.remove('show');
+    const gate=document.getElementById('loginGate');
+    if(gate)gate.style.display='none';
+    const demo=document.getElementById('demoBanner');
+    if(demo)demo.style.display='none';
+    const failures=[];
+    const tasks=[initFoodCategories,renderFoodResults,loadSettings,renderProfile,renderHome,renderWorkout,renderFoodDiary,renderProgress,renderInsights];
+    for(const task of tasks){
+      try{if(typeof task==='function')task();}
+      catch(e){failures.push(`${task?.name||'bagian aplikasi'}: ${e?.message||e}`);console.error('[GlowUp render]',task?.name,e);}
+    }
+    try{
+      const overlay=document.getElementById('profileOverlay');
+      if(!state.profile){if(typeof openProfile==='function')openProfile();else if(overlay)overlay.classList.add('show');}
+      else if(overlay)overlay.classList.remove('show');
+    }catch(e){failures.push(`profil: ${e?.message||e}`);console.error('[GlowUp profile overlay]',e);}
+    if(failures.length){
+      showMainNotice('Kamu berhasil masuk, tetapi sebagian tampilan belum termuat sempurna. Data akun tetap dipisahkan. Coba muat ulang halaman.');
+    }
   }
+
+  let activationPromise = null;
+  let activationUserId = null;
   async function activateUser(user){
-    client = currentClient();
-    if(!client) throw new Error('Koneksi database belum siap.');
-    cloudUser = user;
-    cloudReady = false;
-    window.glowupSuggestedUsername = cleanNameFromUser(user);
-    const {data:row,error}=await client.from('glowup_user_data').select('data').eq('user_id',user.id).maybeSingle();
-    if(error) throw new Error('Akun terautentikasi, tetapi data cloud tidak bisa dibaca: '+error.message+'. Periksa tabel glowup_user_data dan policy RLS.');
-    if(row && row.data && typeof row.data==='object'){
-      const rawSchemaVersion=Number(row.data.__glowup_account_schema_version||0);
-      const oldState=normalizedState(row.data);
-      const storedOwner=String(oldState.__glowup_owner_id||'');
-      if(storedOwner && storedOwner!==user.id){
-        state=freshAccountState(user.id);
-        status('Profil pribadi baru disiapkan untuk akun ini.');
-        await storeAccountState(user.id);
-      } else if(!storedOwner || rawSchemaVersion < 13){
-        const oldName=String(oldState.profile?.name||'profil belum diisi');
-        const oldWeight=(oldState.weights||[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).at(-1)?.weight;
-        const keep=window.confirm(`Periksa data akunmu
+    // Serialize session restore and explicit login so they cannot race and toggle the gate twice.
+    if(activationPromise && activationUserId===user.id) return activationPromise;
+    activationUserId=user.id;
+    activationPromise=(async()=>{
+      client=currentClient();
+      if(!client) throw new Error('Koneksi database belum siap.');
+      cloudUser=user;
+      cloudReady=false;
+      window.glowupSuggestedUsername=cleanNameFromUser(user);
+      const {data:row,error}=await client.from('glowup_user_data').select('data').eq('user_id',user.id).maybeSingle();
+      if(error) throw new Error('Data akun tidak bisa dibaca dari database. Periksa koneksi dan izin database. Detail: '+error.message);
+
+      if(row && row.data && typeof row.data==='object'){
+        const rawSchemaVersion=Number(row.data.__glowup_account_schema_version||0);
+        const oldState=normalizedState(row.data);
+        const storedOwner=String(oldState.__glowup_owner_id||'');
+        if(storedOwner && storedOwner!==user.id){
+          // If a row accidentally contains another account's snapshot, reset only this user's row.
+          state=freshAccountState(user.id);
+          status('Profil baru disiapkan untuk akun ini.',false);
+          await storeAccountState(user.id);
+        }else if(!storedOwner || rawSchemaVersion<13){
+          const oldName=String(oldState.profile?.name||'profil belum diisi');
+          const oldWeight=(oldState.weights||[]).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).at(-1)?.weight;
+          const keep=window.confirm(`Periksa data akunmu
 
 Email akun: ${user.email||'akun ini'}
 Data yang ditemukan: ${oldName}${oldWeight!==undefined?`, ${oldWeight} kg`:''}.
@@ -470,41 +501,61 @@ Data yang ditemukan: ${oldName}${oldWeight!==undefined?`, ${oldWeight} kg`:''}.
 Apakah data ini milik akun ini?
 
 Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau kamu ingin mulai dengan profil baru. Hanya data pada akun ini yang akan direset.`);
-        if(keep){ state=oldState; status('Data akun sebelumnya dipertahankan.'); }
-        else { state=freshAccountState(user.id); status('Profil pribadi baru disiapkan.'); }
-        state.__glowup_owner_id=user.id;
-        state.__glowup_account_schema_version=13;
-        await storeAccountState(user.id);
-      } else {
-        state=oldState;
-        state.__glowup_owner_id=user.id;
-        state.__glowup_account_schema_version=13;
-        status('Data online berhasil dimuat.');
-        saveUserLocalSnapshot(user.id);
+          state=keep?oldState:freshAccountState(user.id);
+          state.__glowup_owner_id=user.id;
+          state.__glowup_account_schema_version=16;
+          if(keep){
+            // Keep the existing account snapshot and update its schema only; if the write fails,
+            // the user remains authenticated and can retry on the next save.
+            status('Data akun sebelumnya dipertahankan.',false);
+            try{await storeAccountState(user.id);}catch(e){console.warn('[GlowUp migration save]',e?.message||e);}
+          }else{
+            status('Profil pribadi baru disiapkan.',false);
+            await storeAccountState(user.id);
+          }
+        }else{
+          state=oldState;
+          state.__glowup_owner_id=user.id;
+          state.__glowup_account_schema_version=16;
+          status('Data online berhasil dimuat.',false);
+          saveUserLocalSnapshot(user.id);
+        }
+      }else{
+        // Load only this authenticated user's snapshot; never copy shared device/demo data.
+        let scoped=null;
+        try{const raw=localStorage.getItem(userStorageKey(user.id));if(raw)scoped=normalizedState(JSON.parse(raw));}catch(e){scoped=null;}
+        if(scoped && (!scoped.__glowup_owner_id || scoped.__glowup_owner_id===user.id)){
+          state=scoped;
+          state.__glowup_owner_id=user.id;
+          state.__glowup_account_schema_version=16;
+          // Migrate a snapshot already scoped to this user, but don't require an empty row insert at login.
+          if(meaningful(state)){
+            try{await storeAccountState(user.id);}catch(e){console.warn('[GlowUp local snapshot migration]',e?.message||e);}
+          }
+        }else{
+          state=freshAccountState(user.id);
+          state.__glowup_account_schema_version=16;
+          // Important: don't insert an empty row at login. The first profile/log save will upsert it.
+          status('Akun siap. Lengkapi profil untuk mulai menyimpan progres.',false);
+        }
       }
-    } else {
-      const scoped=localStorage.getItem(userStorageKey(user.id));
-      if(scoped){
-        try{state=normalizedState(JSON.parse(scoped));}catch(e){state=freshAccountState(user.id);}
-      } else {
-        // Privacy by default: never copy the shared legacy local snapshot into a new account.
-        state=freshAccountState(user.id);
-      }
+
       state.__glowup_owner_id=user.id;
-      state.__glowup_account_schema_version=13;
-      await storeAccountState(user.id);
-      status(state.profile?'Data akun ini berhasil dipulihkan.':'Akun baru siap. Lengkapi profilmu untuk memulai.');
-    }
-    appMode='private';
-    sessionStorage.setItem('glowupMode','private');
-    sessionStorage.setItem('glowupLocalUnlocked','yes');
-    cloudReady=true;
-    redrawApp();
-    const label=document.getElementById('profileSubLabel');
-    if(label)label.textContent='Cloud tersimpan';
-    const storagePill=document.getElementById('progressStorageStatus');
-    if(storagePill)storagePill.textContent='Cloud tersimpan';
-    consumeVerificationNotice(user);
+      state.__glowup_account_schema_version=16;
+      appMode='private';
+      sessionStorage.setItem('glowupMode','private');
+      sessionStorage.setItem('glowupLocalUnlocked','yes');
+      cloudReady=true;
+      redrawApp();
+      const label=document.getElementById('profileSubLabel');
+      if(label)label.textContent='Cloud tersinkron';
+      const storagePill=document.getElementById('progressStorageStatus');
+      if(storagePill)storagePill.textContent='Cloud tersinkron';
+      consumeVerificationNotice(user);
+      return true;
+    })();
+    try{return await activationPromise;}
+    finally{activationPromise=null;activationUserId=null;}
   }
 
   // Replace the device-only gate with real online accounts. New users get a private, clean profile.
@@ -518,12 +569,10 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
         <button type="button" class="secondary cloud-btn-alt" onclick="glowupSaveConnection()">Simpan koneksi database</button>
         <p class="cloud-setup-note">Pengaturan koneksi hanya diperlukan sekali pada perangkat ini. Jangan masukkan Secret key.</p>`;
     gate.innerHTML=`
-      <form class="login-card" id="glowupAuthForm" onsubmit="return glowupAuthAction(event)">
+      <form class="login-card" id="glowupAuthForm" novalidate onsubmit="return glowupAuthAction(event)">
         <div class="login-mark">🌿</div><div class="tagline">STRONGER HABITS · A HEALTHIER YOU</div>
         <h1>GlowUp Journey</h1>
         <p>Catat kebiasaan dan progresmu dengan akun pribadi. Data tiap akun tersimpan terpisah.</p>
-        <div class="cloud-status" id="glowupCloudStatus" role="alert" aria-live="assertive"></div>
-        <button type="button" class="secondary cloud-btn-alt" id="glowupResendBtn" style="display:none" onclick="glowupResendVerification()">Kirim ulang email konfirmasi</button>
         ${connectionBlock}
         <div class="cloud-divider"></div>
         <div id="glowupUsernameWrap" class="signup-only"><label for="glowupUsername">Username / nama tampilan</label><input id="glowupUsername" type="text" maxlength="40" minlength="2" autocomplete="nickname" autocapitalize="words" placeholder="Nama yang akan tampil di aplikasi"><p class="auth-mode-note">Ini nama tampilanmu. Kamu tetap masuk menggunakan email dan password.</p></div>
@@ -533,6 +582,8 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
         <input id="glowupPassword" type="password" autocomplete="current-password" minlength="6" required placeholder="Minimal 6 karakter">
         <button type="submit" id="glowupAuthSubmit">Masuk ke akun</button>
         <button type="button" class="secondary cloud-btn-alt" id="glowupAuthSwitch" onclick="setGlowupAuthMode('signup')">Belum punya akun? Buat akun baru</button>
+        <div class="cloud-status" id="glowupCloudStatus" role="status" aria-live="polite"></div>
+        <button type="button" class="secondary cloud-btn-alt" id="glowupResendBtn" style="display:none" onclick="glowupResendVerification()">Kirim ulang email konfirmasi</button>
         <div class="cloud-divider"></div><button type="button" class="secondary demo-launch" onclick="enterDemo()">Lihat akun demo · data contoh</button>
       </form>`;
     gate.style.display=appMode==='demo'?'none':'flex';
@@ -552,7 +603,7 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
     const resend=document.getElementById('glowupResendBtn');if(resend&&authMode==='signup')resend.style.display='none';
     const email=document.getElementById('glowupEmail');
     if(email)email.setCustomValidity('');
-    status(authMode==='signup'?'Mode daftar aktif. Isi nama tampilan, email, dan password, lalu tekan “Buat akun online”.':'Mode masuk aktif. Masukkan email dan password akunmu.');
+    status(authMode==='signup'?'Daftar akun baru: isi nama tampilan, email, dan password.':'Masuk dengan email dan password akunmu.',false);
   };
 
   window.glowupResendVerification = async function(){
@@ -580,22 +631,29 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
       toast('Koneksi database disimpan.');
     }catch(err){ status(err.message || 'Key belum benar.', true); }
   };
-  window.glowupAuthAction = async function(event){
+  let authActionInProgress=false;
+  window.glowupAuthAction=async function(event){
     if(event&&typeof event.preventDefault==='function')event.preventDefault();
+    if(authActionInProgress){status('Permintaan sebelumnya masih diproses. Tunggu sebentar, ya.',true);return false;}
     const mode=authMode;
     const email=(document.getElementById('glowupEmail')?.value||'').trim().toLowerCase();
     const password=document.getElementById('glowupPassword')?.value||'';
     const username=(document.getElementById('glowupUsername')?.value||'').trim();
-    let authStage='credentials';
     const formGate=document.getElementById('loginGate');
     const submitButton=document.getElementById('glowupAuthSubmit');
-    if(!email||!password){status('Isi email dan password terlebih dahulu.',true);return false;}
-    if(mode==='signup'&&username.length<2){status('Isi username atau nama tampilan minimal 2 karakter.',true);return false;}
+    if(!email){status('Masukkan alamat email terlebih dahulu.',true);return false;}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){status('Format email belum benar. Contoh: nama@email.com.',true);return false;}
+    if(!password){status('Masukkan password terlebih dahulu.',true);return false;}
+    if(mode==='signup'&&username.length<2){status('Isi username/nama tampilan minimal 2 karakter.',true);document.getElementById('glowupUsername')?.focus();return false;}
+    if(mode==='signup'&&password.length<6){status('Password untuk akun baru minimal 6 karakter.',true);document.getElementById('glowupPassword')?.focus();return false;}
+
+    authActionInProgress=true;
+    let authStage='checking-credentials';
+    status(mode==='signup'?'Sedang membuat akun...':'Sedang memeriksa akun...',false);
     try{
       client=currentClient();
-      if(!client){status('Koneksi database belum siap. Muat ulang halaman. Jika masih muncul, periksa koneksi internet.',true);return false;}
+      if(!client)throw new Error('Koneksi database belum siap. Muat ulang halaman dan coba lagi.');
       if(submitButton){submitButton.disabled=true;submitButton.textContent=mode==='signup'?'Membuat akun...':'Sedang masuk...';}
-      status(mode==='signup'?'Membuat akun pribadi...':'Memeriksa akun dan memuat datamu...');
       if(mode==='signup'){
         authStage='creating-account';
         const {data,error}=await client.auth.signUp({email,password,options:{emailRedirectTo:EMAIL_REDIRECT,data:{display_name:username,username}}});
@@ -608,52 +666,64 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
           showMainNotice(`Selamat datang, ${username}! Akun kamu siap digunakan.`);
         }else{
           localStorage.setItem(PENDING_VERIFY_PREFIX+email,'1');
-          const resend=document.getElementById('glowupResendBtn');
-          if(resend)resend.style.display='block';
           window.setGlowupAuthMode('signin');
-          status(`Akun ${username} berhasil dibuat. Buka email ${email}, lalu tekan tautan konfirmasi. Setelah kembali ke GlowUp Journey, masuk menggunakan email dan password yang sama. Jika email belum masuk, periksa folder spam atau gunakan tombol kirim ulang.`,false);
+          const resend=document.getElementById('glowupResendBtn');if(resend)resend.style.display='block';
+          status(`Akun berhasil dibuat untuk ${email}. Buka inbox atau folder spam dan tekan tautan konfirmasi email. Setelah itu kembali ke sini dan masuk dengan email serta password yang sama.`,false);
         }
       }else{
         authStage='checking-credentials';
         const {data,error}=await client.auth.signInWithPassword({email,password});
         if(error)throw error;
-        if(!data.user)throw new Error('Supabase tidak mengembalikan profil akun setelah login. Coba muat ulang halaman.');
+        if(!data?.user)throw new Error('Email/password tidak cocok atau akun belum terdaftar.');
         authStage='loading-account-data';
         await activateUser(data.user);
         toast('Berhasil masuk ke akunmu.');
       }
     }catch(err){
       const message=String(err?.message||'');
-      // If activation failed after login, explicitly reopen the gate so the message is never hidden.
-      if(formGate)formGate.style.display='flex';
       const overlay=document.getElementById('profileOverlay');
       if(overlay)overlay.classList.remove('show');
-      const detailed = message ? ` Detail: ${message}` : '';
-      if(authStage==='loading-account-data'){
-        status('Login berhasil dikenali, tetapi data cloud belum bisa dimuat atau disimpan. Akun tidak dihapus. Coba muat ulang; jika berulang, kirim screenshot pesan ini ke support.'+detailed,true);
-      }else if(/invalid login credentials|invalid credentials/i.test(message)){
-        status('Email atau password salah. Periksa kembali ejaan email dan password, lalu coba lagi.',true);
-      }else if(/email not confirmed/i.test(message)){
-        status('Email belum terverifikasi. Buka email konfirmasi terbaru atau tekan “Kirim ulang email konfirmasi” di bawah pesan ini.',true);
-        const resend=document.getElementById('glowupResendBtn');if(resend)resend.style.display='block';
-      }else if(/user already registered|already registered/i.test(message)){
-        status('Email ini sudah terdaftar. Pilih “Masuk ke akun”, bukan “Buat akun online”.',true);
-      }else if(/password should be at least|weak password|password is too short/i.test(message)){
-        status('Password terlalu pendek atau terlalu mudah ditebak. Gunakan password yang lebih kuat (minimal 6 karakter).',true);
-      }else if(/rate limit|too many requests/i.test(message)){
-        status('Terlalu banyak percobaan dalam waktu singkat. Tunggu beberapa menit, lalu coba lagi.',true);
-      }else if(/failed to fetch|network|load failed/i.test(message)){
-        status('Tidak bisa terhubung ke layanan akun. Periksa internet iPhone, lalu muat ulang halaman.',true);
+      if(authStage==='loading-account-data' && cloudUser && cloudReady){
+        // Authentication succeeded; never bounce back to login solely because one screen renderer failed.
+        const gateEl=document.getElementById('loginGate');if(gateEl)gateEl.style.display='none';
+        showMainNotice('Akun berhasil terhubung, tetapi ada bagian data/tampilan yang belum selesai dimuat. Muat ulang halaman. '+(message?`Detail: ${message}`:''));
       }else{
-        status('Belum berhasil. Periksa email, password, dan koneksi. Jika tetap gagal, pesan teknis berikut membantu menemukan penyebabnya.'+detailed,true);
+        if(formGate)formGate.style.display='flex';
+        sessionStorage.removeItem('glowupLocalUnlocked');
+        sessionStorage.removeItem('glowupMode');
+        cloudReady=false;
+        cloudUser=null;
+        if(/invalid login credentials|invalid credentials|email not found|user not found/i.test(message)){
+          status('Email atau password tidak cocok, atau akun belum terdaftar. Periksa kembali, atau pilih “Buat akun baru” jika belum pernah mendaftar.',true);
+        }else if(/email not confirmed/i.test(message)){
+          status('Email belum terverifikasi. Buka tautan konfirmasi terbaru dari inbox, atau tekan “Kirim ulang email konfirmasi” di bawah pesan ini.',true);
+          const resend=document.getElementById('glowupResendBtn');if(resend)resend.style.display='block';
+        }else if(/user already registered|already registered/i.test(message)){
+          status('Email ini sudah terdaftar. Pilih “Masuk ke akun”. Jika belum bisa masuk, periksa email konfirmasi dan gunakan password yang sama.',true);
+        }else if(/password should be at least|weak password|password is too short/i.test(message)){
+          status('Password terlalu pendek atau terlalu mudah ditebak. Gunakan password yang lebih kuat, minimal 6 karakter.',true);
+        }else if(/invalid email|email address is invalid/i.test(message)){
+          status('Alamat email belum valid. Periksa kembali penulisannya.',true);
+        }else if(/rate limit|too many requests/i.test(message)){
+          status('Terlalu banyak percobaan dalam waktu singkat. Tunggu beberapa menit, lalu coba lagi.',true);
+        }else if(/failed to fetch|network|load failed|fetch failed/i.test(message)){
+          status('Tidak bisa terhubung ke layanan akun. Periksa koneksi internet iPhone, lalu muat ulang halaman.',true);
+        }else if(/database|row level security|permission denied|glowup_user_data|policy/i.test(message)){
+          status('Akun sudah dikenali, tetapi koneksi penyimpanan online bermasalah. Data tidak dihapus. Kirim screenshot pesan teknis di bawah ke aku.',true);
+          if(message)status('Penyimpanan online bermasalah. Data tidak dihapus. Detail untuk diperiksa: '+message,true);
+        }else{
+          status(mode==='signup'?'Pendaftaran belum berhasil. Periksa email, password, dan koneksi, lalu coba lagi.':'Belum berhasil masuk. Periksa email dan password, lalu coba lagi.'+(message?`
+Detail: ${message}`:''),true);
+        }
+        if(message)console.warn('[GlowUp auth]',message);
       }
-      if(formGate)formGate.scrollTop=0;
-      if(message)console.warn('[GlowUp auth]',message);
     }finally{
+      authActionInProgress=false;
       if(submitButton){submitButton.disabled=false;submitButton.textContent=authMode==='signup'?'Buat akun online':'Masuk ke akun';}
     }
     return false;
   };
+
   window.persist=function(){
     if(appMode==='demo'){oldPersist();return;}
     if(!cloudUser){oldPersist();return;}
@@ -670,7 +740,7 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
       const pill=document.getElementById('progressStorageStatus');
       if(label)label.textContent='Belum tersinkron';
       if(pill)pill.textContent='Belum tersinkron';
-      status('Data belum tersimpan online. '+(err?.message||'Periksa koneksi database.'),true);
+      showMainNotice('Data belum tersimpan online. Jangan tutup aplikasi dulu; periksa koneksi. Detail: '+(err?.message||'Periksa koneksi database.'));toast('Data belum tersimpan online.');
     });},900);
   };
   window.renderProfile=function(){
@@ -721,5 +791,21 @@ Pilih OK untuk mempertahankan data. Pilih Batal jika data milik orang lain atau 
 })();
 </script>
 
-<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=15-auth-workout-audit',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
+<script>
+// v16: expose the workout-session control explicitly for inline button handlers on iOS.
+window.setWorkoutSession=function(session,button){
+  if(session!=='morning'&&session!=='evening')return;
+  try{
+    workoutSession=session;
+    document.querySelectorAll('[data-workout-session]').forEach(el=>el.classList.toggle('active',el.dataset.workoutSession===session));
+    if(typeof renderWorkout==='function')renderWorkout();
+  }catch(error){
+    console.error('[GlowUp workout session]',error);
+    const note=document.getElementById('toast');
+    if(note){note.textContent='Sesi olahraga belum bisa dibuka. Muat ulang halaman, lalu coba lagi.';note.classList.add('show');}
+  }
+};
+</script>
+<script>if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=16-auth-feedback-footer',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));</script>
+<div class="ozward-footer" role="contentinfo">© Ozward 2027 · glowup-journey v16</div>
 </body></html>
